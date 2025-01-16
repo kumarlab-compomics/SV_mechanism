@@ -66,7 +66,11 @@ When running the master batch script, the following arguments must be provided :
 
 An example of the use of this command is: 
 ```
-sbatch execute_Master1_240502.sh allHGSVC3_20240415_Freeze4_GRCh38 sv freeze4_GRCh38_sv_insdel_alt.vcf.SVlength.csv H1
+sbatch execute_Master1_240502.sh \
+allHGSVC3_20240415_Freeze4_GRCh38 \
+sv \
+freeze4_GRCh38_sv_insdel_alt.vcf.SVlength.csv \
+H1
 ```
 
 ## Simulation generation & Z-score calculation
