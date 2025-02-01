@@ -25,7 +25,7 @@ filenamenoext=$(basename "${filename%.*}")
 # 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
 
 # We now push this python script which will annotate the SV's sequence features
-python adding_seqFeaturesSV_240118.py \
+python adding_seqFeaturesSV.py \
 ${files} \
 $1 $2 \
 ${filenamenoext} \
