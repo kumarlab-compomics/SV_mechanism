@@ -27,7 +27,7 @@ filenamenoext=$(basename "${filename%.*}")
 # We push this python script to annotate the replication timing of the SV's position
 # Note: This requires a file which is generated using a RepliSeq experiment (H1 cell line, 16-stage downloaded from 4D) then processed with RepliSeq
   # See: https://github.com/CL-CHEN-Lab/RepliSeq 
-# The processed file (tempS50.csv) is held in the /data/H1/ directory
+# The processed file (tempS50.csv) is held in the /data/RepliSeq/H1/ directory
 python adding_RepliSeq.py \
 /home/nboev/projects/def-sushant/nboev/data/RepliSeq/H1/Multi-stage/tempS50.csv \
 ${files} \
