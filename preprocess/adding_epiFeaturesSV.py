@@ -12,7 +12,10 @@ from scipy.stats import linregress
 print('\n **********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-# Writing this so we can annotate all the files at once
+# In this script, we take in a vcf/csv batch file and annotate the SVs themselves with their epigenomic features based on ENCODE pybigwigs
+# This annotation requires the use of the pyBigWig package
+
+# Data inputs sent in from the execution files
 svs = pd.read_csv(str(argv[1]), comment='#', sep='\t')
 project = str(argv[2])
 loc = str(argv[3])
@@ -20,22 +23,25 @@ filename = str(argv[4])
 chr = str(argv[5])
 episite = str(argv[6])
 celline = str(argv[7])
-
 svs = svs[svs['CHROM'] == chr]
 
-# we're going to make it a fct bc we're going to force all the epis
-
+'''
+The function, add_avgepi, does the annotations itself
+The input: 
+	epi_file: Location of the pybigwig files
+	epi: The name of the epigenomic feature
+	df: The file to annotate
+'''
 def add_avgepi(epi_file, epi, df):
-
 	to_open = episite+epi_file
 	bb = pyBigWig.open(to_open)
 
-# we can only calculate these values for the deletions
+	# We must filter out for deletions only since these insertions are not measured in the cell sequenced
 	for idx, row in df[(df.SV_logic == True)&((df.SV_Type == 'deletion') | (df.SV_Type == 'DEL'))] .iterrows():
 		try:
+			# Appending the average, slope of the region, max, min, standard deviation and coverage from the bigwig
 			avg = bb.stats(row.CHROM, int(row.POS), int(row.POS+row.SVlen))
 			df.loc[idx, 'avgepi_'+epi] = avg
-
 			xs = list(range(1, int(row.SVlen)+1))
 			ys = bb.values(row.CHROM, int(row.POS), int(row.POS+row.SVlen))
 			slope = linregress(xs, ys)[0]
@@ -58,8 +64,8 @@ def add_avgepi(epi_file, epi, df):
 
 	return df
 
+# Calling the add_avgepi function by cell line and bigwig file
 if celline == 'H1':
-# using the diff epi files
 	newsvs = add_avgepi('ENCBS718AAA/CTCF/ENCFF269OPL.bigWig','CTCF', svs)
 	newsvs = add_avgepi('ENCBS718AAA/H2AFZ/ENCFF758YFI.bigWig','H2AFZ', newsvs)
 	newsvs = add_avgepi('ENCBS718AAA/H3K36me3/ENCFF687LJF.bigWig','H3K36me3', newsvs)
@@ -88,8 +94,7 @@ elif celline == 'HelaS3':
 	newsvs = add_avgepi('ENCSR043WJN/WGB-Seq/ENCFF193DAN.bigWig','WGB-Seq+', newsvs)
 	newsvs = add_avgepi('ENCSR043WJN/WGB-Seq/ENCFF347UWH.bigWig','WGB-Seq-', newsvs)
 
-print(newsvs.head())
-
+# Save the final appended file
 newsvs.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/ENCODE/'+celline+'/'+chr+'/'+filename+'.EpiFeatSVs.csv', sep='\t', index=False)
 
 print('end of script')
