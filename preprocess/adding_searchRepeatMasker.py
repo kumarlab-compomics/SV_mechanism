@@ -11,13 +11,17 @@ from pytz import timezone
 print('\n**********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-print(argv[1])
+# In this script, we take in a vcf/csv batch file and annotate send the SV to RepeatMasker
+# This annotation requires the use of RepeatMasker
+
 svs = pd.read_csv(str(argv[1]), comment='#', sep='\t')
 project = str(argv[2])
 loc = str(argv[3])
 filename = str(argv[4])
 chr = str(argv[5])
-print(svs.head())
+
+# We iterate through every row. We obtain the REF or ALT sequence (deletion vs insertion) to create a fasta file. We append each sequence from this vcf/csv into this one fasta.
+# This fasta is saved within the chromosome and split's directory. This fasta file is then sent to RepeatMasker. We use the human database for annotation.
 
 for idx, row in svs.iterrows():
 	if (row.SV_Type == 'insertion') | (row.SV_Type == 'INS'):
@@ -30,10 +34,6 @@ for idx, row in svs.iterrows():
 		with open('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/searchRepeatMasker/'+chr+'/'+filename+'/'+filename+'.fa', 'a') as fh:
 			fh.write(search)
 
-
 os.system('/bin/bash -c "RepeatMasker -species human -s /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/searchRepeatMasker/"'+chr+'"/"'+filename+'"/"'+filename+'".fa"')
-
-# now we're going to combine this with the merging steps
-
 
 print('END TIME:', datetime.datetime.now(timezone('EST')))
