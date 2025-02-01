@@ -11,39 +11,34 @@ import itertools
 print('\n **********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-# Getting the vcf and opening with pandas --> skip the following for now
-print(argv[1])
+# In this script, we take the output from RepeatMasker (SV ref/alt sequence annotations) and append the results to the original vcf/csv
+
 svs = pd.read_csv(str(argv[1]), comment='#', sep='\t')
 project = str(argv[2])
 loc = str(argv[3])
 filename = str(argv[4])
 chr = str(argv[5])
-print(svs.head())
 
 svs = svs[svs.CHROM == chr]
 ogrow = len(svs)
 print('og number of rows:', ogrow)
 
-# Adding ID matching
+# Addition of a standardized ID we can use later to merge with
 for idx, row in svs.iterrows():
 	svs.loc[idx, 'ID_match'] = row['CHROM']+ '_' +str(row['POS'])+ '_' + str(row['SVlen'])+ '_' + row['SV_Type']
 
-
-# adding the repeatmasker data
+# Parsing the RepeatMasker file
 rep2 = pd.read_csv(str(argv[6]), header = None, skiprows = [0,1,2])
 rep2 = rep2.replace(r"^ +| +$", r"", regex=True)
 rep2 = rep2.replace({' +':' '},regex=True)
 rep2 = rep2[0].str.split(' ',  expand=True)
-
-# were having some issues with feeding in the y chromosome = 2023/10/31
 rep2 = rep2.iloc[:,0:15]
-#rep2.columns = ['swScore', 'milliDiv', 'milliDel', 'milliIns', 'ID_match', 'genoStart', 'genoEnd', 'genoLeft', 'strand', 'repName', 'repClass', 'repStart', 'repEnd', 'repLeft', 'id', 'nan1']
 rep2.columns = ['swScore', 'milliDiv', 'milliDel', 'milliIns', 'ID_match', 'genoStart', 'genoEnd', 'genoLeft', 'strand', 'repName', 'repClass', 'repStart', 'repEnd', 'repLeft', 'id']
 
-# grabbing list of IDs
+# Grab unique IDs from the RepeatMasker file.
+# We will loop through these IDs to append a list of unique classes and names to each SV. This therefore is a record of which classes and names were present in the SV
 unique_svs = list(rep2.ID_match.unique())
 
-# looping throught the svs
 for i in unique_svs:
 	grab_class = []
 	grab_class.append(list(rep2[rep2.ID_match ==i ].repClass.values))
@@ -58,9 +53,8 @@ for i in unique_svs:
 newrow = len(svs)
 print('new number of rows:', newrow)
 
-# checking if the rows match (they should)
+# If the new number of rows matches the original number of rows, save the annotated dataframe
 if ogrow == newrow:
-	print('good merge')
 	svs.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/searchRepeatMasker/'+chr+ '/' +filename+'/'+filename+'.searchRepMasker.csv', sep='\t', index=False)
 else:
 	print('poor merged')
