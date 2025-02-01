@@ -25,9 +25,9 @@ filenamenoext=$(basename "${filename%.*}")
 # 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
 
 # We push this python script to annotate the replication timing of the SV's position
-# Note: This requires a file which is generated using RepliSeq data then processed with RepliSeq 
+# Note: This requires a file which is generated using a RepliSeq experiment (H1 cell line, 16-stage downloaded from 4D) then processed with RepliSeq
   # See: https://github.com/CL-CHEN-Lab/RepliSeq 
-# The processed file (tempS50.csv) is held in the data directory
+# The processed file (tempS50.csv) is held in the /data/H1/ directory
 python adding_RepliSeq.py \
 /home/nboev/projects/def-sushant/nboev/data/RepliSeq/H1/Multi-stage/tempS50.csv \
 ${files} \
