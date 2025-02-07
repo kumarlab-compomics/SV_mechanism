@@ -25,6 +25,8 @@ The following loops through all the rows in the vcf/csv file to generate custome
  1. We generate standardized IDs for each SV
  2. We generate start/stop SV lengths, as per the config file.
  3. We use a new location for the config file, to hold the correct INDEL_maximum_length and INDEL_maximum_length lengths, as per the SV. This is done by interacting with the shell
+
+ Note: In the parameter_file file, we request 300 indels be generated. In reality, we only need 100 simulations/ SV. However, since we cannot control the specific number of insertions or deletions to generate, we "overshoot" and correct for this in the execute_SurvivorTemplate.sh script
 '''
 
 for idx, row in svs.iterrows():
