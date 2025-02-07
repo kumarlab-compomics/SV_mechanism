@@ -12,26 +12,21 @@ import matplotlib as mpl
 print('\n**********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-# Getting the vcf and opening with pandas
-print(argv[1])
+# In this script, we take the bed file counts from Rloop annotations, and merge with the vcf. Our goal is to determine the greatest RLoop level obtained in the flanking region
+
+# Data inputs sent in from the execution files
 svs = pd.read_csv(str(argv[1]), comment='#', sep='\t')
 project = str(argv[2])
 loc = str(argv[3])
 filename = str(argv[4])
 chr = str(argv[5])
-print(svs.head())
 
-ogrow = len(svs)
-print('og rows:', ogrow)
-
-# we need to add the unique identifier
-# we're going to save a version I can use with bedtools
+# Adding an unique identifier that we can use to match across the flanking results and the bed file results
 for idx, row in svs.iterrows():
 	svs.loc[idx, 'unique_id'] = row['CHROM']+ '_' +str(row['POS'])+ '_' +str(row['SVlen'])+ '_' +row['SV_Type']
 
-print(svs.head())
 
-# Getting the file with flanked annotations and opening with pandas
+# Grabbing the count bed files
 level9 = pd.read_csv(str(argv[6]), comment='#', sep='\t', header=None)
 level8 = pd.read_csv(str(argv[7]), comment='#', sep='\t', header=None)
 level7 = pd.read_csv(str(argv[8]), comment='#', sep='\t', header=None)
@@ -42,19 +37,25 @@ level3 = pd.read_csv(str(argv[12]), comment='#', sep='\t', header=None)
 level2 = pd.read_csv(str(argv[13]), comment='#', sep='\t', header=None)
 level1 = pd.read_csv(str(argv[14]), comment='#', sep='\t', header=None)
 
+'''
+The function, cleaning, pulls the counts from a bed file and determines the number of Rloop regions determined in the flank. This creates new columns as per the presence/absence of a level discovered in the flanks
+	Recall, in the bedtool, you have two entries per SV, the pre and post flank
+The input: 
+	rloop: Bedfile with counts
+	lvl: The matching Rloop "level"
+'''
 
 def cleaning (rloop, lvl):
 	rloop.rename(columns={0: 'CHROM', 1: 'Start', 2:'End', 3:'unique_id', 4:'count'}, inplace=True)
 	counted = rloop.groupby(['CHROM', 'unique_id'])['count'].agg(['sum']).add_prefix(lvl+'_').reset_index()
-
 	for idx, row in counted.iterrows():
 		if row[lvl + '_sum'] != 0:
 			counted.loc[idx, lvl] = True
 		else:
 			counted.loc[idx, lvl] = False
-
 	return counted
 
+# Calling the cleaning function above
 count9 = cleaning(level9, 'lvl9')
 count8 = cleaning(level8, 'lvl8')
 count7 = cleaning(level7, 'lvl7')
@@ -65,12 +66,19 @@ count3 = cleaning(level3, 'lvl3')
 count2 = cleaning(level2, 'lvl2')
 count1 = cleaning(level1, 'lvl1')
 
+'''
+The function, merging, helps do a series of merge iterations
+The input: 
+	df1: Dataframe 1 to merge with
+	df2: Dataframe 2 to merge with
+'''
+
 def merging(df1, df2):
 	df = pd.merge(df1, df2, on='unique_id', how='inner', suffixes=('', '_delme'))
 	df = df[[c for c in df.columns if not c.endswith('_delme')]]
-
 	return df
 
+# Calling the merging function to merge the count files across all 9 levels
 m1 = merging(count9, count8)
 m2 = merging(m1, count7)
 m3 = merging(m2, count6)
@@ -80,6 +88,7 @@ m6 = merging(m5, count3)
 m7 = merging(m6, count2)
 merged_df = merging(m7, count1)
 
+# Goes through all the levels, whereby we are trying to find the max Rloop level per SV
 for idx, row in merged_df.iterrows():
 	if row.lvl9 == True:
 		merged_df.loc[idx, 'RLoop'] = 9
@@ -102,18 +111,8 @@ for idx, row in merged_df.iterrows():
 	else:
 		merged_df.loc[idx, 'RLoop'] = 0
 
-print(merged_df.head())
-
-# then we need to merge with the og svs then we need to check the lengths and save
-newrow = len(merged_df)
-print('new number of rows:', newrow)
-
-# checking if the rows match (they should)
-#if ogrow == newrow:
-#	print('good merge')
+# Saving the annotated dataframe
 merged_df.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/RLoopForming/'+chr +'/postmerge/'+filename+'.RLoopflanks_merged.csv', sep='\t', index=False)
-#else:
-#	print('poor merged')
 
 print('end of script')
 print('END TIME:', datetime.datetime.now(timezone('EST')))
