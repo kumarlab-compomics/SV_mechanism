@@ -10,25 +10,28 @@ from pytz import timezone
 print('\n **********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-# Getting the vcf and opening with pandas
+# In this script, we take in a vcf/csv batch file and create bed files which represent the coordinates which map to the up and downstream flanking regions
+
 svs = pd.read_csv(str(argv[1]), comment='#', sep='\t')
-print('PRE ANNOTATION')
-print(svs.head())
 project = str(argv[2])
 loc = str(argv[3])
 filename = str(argv[4])
 chr = str(argv[5])
 size = str(argv[6])
 
-# updated so we can alter the SV flank vals
-def pulling(df, flank) :
+'''
+The function, pulling, calculates the coordinates of the flanks using the SV positions and lengths
+The input: 
+	df: The file to annotate
+ 	flank: The length of the flank to consider (the value used in the execution script is 2000bp)
+'''
 
+def pulling(df, flank) :
+	# Create an appropriate name given the length of the flank to use
 	precoord = 'pre_'+str(flank)+'_coord'
 	postcoord = 'post_'+str(flank)+'_coord'
 
-# we're going to add coordinates we can add for our upstream and downstream flanks
-# modifications after adding unresolved SVs --> ex. deletion and deletion_ME
-
+	# For each row, calculate the pre and post coordinates. Recall, for deletions, you must consider the length when "starting" the flanking position
 	for idx, row in df.iterrows():
 		if (row.SV_Type == 'deletion')|(row.SV_Type == 'DEL'):
 			df.loc[idx, precoord] = int(row.POS - flank)
@@ -40,8 +43,10 @@ def pulling(df, flank) :
 
 	return df
 
-
+# Calling the pulling function
 svs = pulling(svs, int(size))
+
+# just use the function above!!!???
 
 # we're going to save a version I can use with bedtools
 for idx, row in svs.iterrows():
