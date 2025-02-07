@@ -56,6 +56,7 @@ svs['postflank_start'] = svs['postflank_start'].apply(np.int64)
 svs['postflank_end'] = svs['postflank_end'].apply(np.int64)
 
 # Since we've added these columns wide-wise, we need to do some re-formatting to convert it to long-wise
+# In the end, we produce a bed file whereby 1 SV is represented with two rows: the preflank and the postflanking regions
 short = svs [['CHROM', 'preflank_start', 'preflank_end', 'postflank_start', 'postflank_end', 'unique_id']]
 starts = short[['CHROM','preflank_start', 'postflank_start', 'unique_id']]
 ends = short[['CHROM','preflank_end', 'postflank_end', 'unique_id']]
