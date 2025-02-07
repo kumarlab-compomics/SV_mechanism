@@ -39,7 +39,7 @@ mkdir /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}
 mkdir /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/$1/$2/processedIND/${files}
 
 # We push this python script to create SURVIVOR configuration file used for SV simulation generation
-python generating_lensIND_240424.py \
+python generating_lensIND.py \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/SVlen/$3 \
 ${files} \
 parameter_file \
@@ -61,7 +61,7 @@ ls /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/${files}.split* \
 > /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/splitnames.txt
 
 # We now have to alter some parameters within the execute_SurvivorTemplate_240716.sh script, adjusted for each chromosome + number of splts required
-cp execute_SurvivorTemplate_240716.sh \
+cp execute_SurvivorTemplate.sh \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh
 
 sed -i "s/PROJECT/$1/g" /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh
@@ -73,7 +73,7 @@ sed -i "s/CHROM/${files}/g" /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/$
 sbatch /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh $1 $2
 
 # example: 
-# sbatch execute_svSimsMasterINDPAR1_240716.sh 20220422_3202_phased_SNV_INDEL_SV_bychrom SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
+# sbatch execute_svSimsMaster.sh 20220422_3202_phased_SNV_INDEL_SV_bychrom SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
 
 
 
