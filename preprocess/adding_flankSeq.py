@@ -27,25 +27,26 @@ post_str = "post_flank_seq_"+str(flank)
 
 df = svs[svs.CHROM == chr]
 
-# The following loops through all the rows in the vcf/csv file to pull the reference sequence
-# The insertion/deletion procedure are the same, whereby the difference lies in the downstream flank coordinates, since deletions require the consideration of the SV length
+'''
+The following loops through all the rows in the vcf/csv file to pull the reference sequence
+1. We identify the pre-flanking position using the requested flank length
+2. We interact with the shell system to call the samtools faidx function. Whereby, we provide the pre flanking coordinates and the HG38 reference genome and save the sequence in a fasta file
+3. We read this fasta file using Bio's SeqIO function
+4. We save this sequence in the pre_str column in a standardized format (upper case)
+5. We delete the fasta file to mitigate space + overwriting issues
+
+We do these steps for both the up and downstream flanks, along for insertions and deletions. 
+	Note : The difference in the DEL vs INS procedure lies in the downstream flank coordinates, since deletions require the consideration of the SV length
+'''
 
 for idx, row in df[df.SV_logic == True].iterrows():
 	if ((row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') ) :
-
-		# We identify the pre-flanking position using the requested flank length
 		prestart = int(row.POS) - int(flank)
-		# We interact with the shell system to call the samtools faidx function.
-		# We provide the pre flanking coordinates and the HG38 reference genome and save the sequence in a fasta file
 		os.system('/bin/bash -c "samtools faidx /home/nboev/projects/def-sushant/nboev/data/Genome/hg38.fa "' +chr+ '":"' +str(prestart)+ '"-"' +str(row.POS)+ '" -o /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
-		# We read this fasta file using Bio's SeqIO function
 		record = SeqIO.read("/home/nboev/projects/def-sushant/nboev/preprocess/"+project+"/"+loc+"/flankSeq/"+chr+'/'+filename+"testing.fasta", "fasta")
-		# We save this sequence in the pre_str column in a standardized format (upper case)
 		df.loc[idx, pre_str] = str(record.seq).upper()
-		# We delete the fasta file to mitigate space + overwriting issues
 		os.system('/bin/bash -c "rm /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
 
-		# We repeat the above steps using the post flanking coordinates
 		poststart = int(row.POS) + int(row.SVlen)
 		postend = int(row.POS) + int(row.SVlen) + int(flank)
 		os.system('/bin/bash -c "samtools faidx /home/nboev/projects/def-sushant/nboev/data/Genome/hg38.fa "' +chr+ '":"' +str(poststart)+ '"-"' +str(postend)+ '" -o /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
@@ -53,13 +54,13 @@ for idx, row in df[df.SV_logic == True].iterrows():
 		df.loc[idx, post_str] = str(record.seq).upper()
 		os.system('/bin/bash -c "rm /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
 
-
 	elif ((row.SV_Type == 'insertion') | (row.SV_Type == 'INS') ):
 		prestart = int(row.POS) - int(flank)
 		os.system('/bin/bash -c "samtools faidx /home/nboev/projects/def-sushant/nboev/data/Genome/hg38.fa "' +chr+ '":"' +str(prestart)+ '"-"' +str(row.POS)+ '" -o /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
 		record = SeqIO.read("/home/nboev/projects/def-sushant/nboev/preprocess/"+project+"/"+loc+"/flankSeq/"+chr+'/'+filename+"testing.fasta", "fasta")
 		df.loc[idx, pre_str] = str(record.seq).upper()
 		os.system('/bin/bash -c "rm /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
+		
 		postend = int(row.POS) + int(flank)
 		os.system('/bin/bash -c "samtools faidx /home/nboev/projects/def-sushant/nboev/data/Genome/hg38.fa "' +chr+ '":"' +str(row.POS)+ '"-"' +str(postend)+ '" -o /home/nboev/projects/def-sushant/nboev/preprocess/"'+project+'"/"'+loc+'"/flankSeq/"'+chr+'"/"'+filename+'"testing.fasta"')
 		record = SeqIO.read("/home/nboev/projects/def-sushant/nboev/preprocess/"+project+"/"+loc+"/flankSeq/"+chr+'/'+filename+"testing.fasta", "fasta")
