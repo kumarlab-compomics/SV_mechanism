@@ -9,27 +9,32 @@
 #SBATCH --error=/home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/PROJECT/LOCATION/SurvivorCHROM_%j.e
 #SBATCH --array=0-0
 
-# changed the time +memory req, was 15G and 3.5 days
-
+# Loading in virtual environment and modules
 module --force purge ; module load StdEnv/2020
 module load samtools
 module load survivor
 source $HOME/virtenv/bin/activate
 
-# looping through files from the split
+# We run the correct number of jobs, as per the number of SVs were present, and therefore "splits" created. 
 names=($(cat /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/splitnames.txt))
 files=${names[${SLURM_ARRAY_TASK_ID}]}
-echo "${files}"
-
 split=$(basename ${files} .txt)
 mkdir /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}
 
-# Add something to capture different referece versions!! = instead of hg38_seq, allow user to pick!, we don't need to do this here!
+# The input: (sent from execute_svSimsMaster.sh)
+# 1: Project name and location
+# 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
+
+# The following: 
+# Loops through the configuration files
+# For each configuration file, we create simulations using the simSV function from SURVIVOR. We supplement the correct reference fasta by providing the chromosome-specific fasta
+# For insertions, we require the fasta file produced by SURVIVOR. The bed and the fasta are sent to the generating_vcfINS.py script
+# For deletions, we only need the bed file. The REF sequences are taken from the reference genome using faidx. This is done in generating_vcfDEL.py
+# Since we are only generating 100 simulations/ real SV, we use 100 as the input argument for these python functions. 
+# We delete unnecessary files as we go to mitigate overwriting and space issues
+
 cat ${files} | while read line;
         do
-	echo $line
-        echo /home/nboev/scratch/data/SimulatedSVs/$1/$2/parameterIND/CHROM/$line
-
         SURVIVOR simSV \
 /home/nboev/projects/def-sushant/nboev/data/Genome/hg38_seq/chroms/CHROM.fa \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/parameterIND/CHROM/$line \
@@ -69,6 +74,7 @@ $3 \
         fi
         done
 
+# We merge across all the files for this split
 awk '(NR == 1) || (FNR > 1)' \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/*.csv \
 > /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/$1/$2/processedIND/CHROM/${split}.csv
