@@ -5,22 +5,22 @@ library(dplyr)
 
 args = commandArgs(trailingOnly=TRUE)
 
+# In this script, we start with the three fasta files produced by adding_BlastDNAShape.py, which represent the 2 flanks (up and downstream) and SV sequences. 
+# The goal of this script is the calculate DNA shape features using the function, DNAshapeR (see: https://github.com/TsuPeiChiu/DNAshapeR)
+
+# Data inputs sent in from the python files and sent to the getShape function
 pred_SV = getShape(args[1])
 pred_PRE = getShape(args[2])
 pred_POST = getShape(args[3])
 
 needtosplit = toString(args[1])
-#stringerID = strsplit(strsplit(last(strsplit(needtosplit, split = "/")[[1]]), split = 'SV_')[[1]][2], split = '.fa')[[1]]
 stringerID = toString(args[4])
-
-#stringerCSV = paste0(strsplit(needtosplit, split = 'SV')[[1]][1], 'allDNA_ShapeR.csv')
 stringerCSV = paste0(strsplit(needtosplit, split = '.fa'), '.csv')
 
-print(stringerID)
-print(stringerCSV)
-
+# An empty dataframe to hold the results we calculate
 df = data.frame(matrix(ncol = 0, nrow = 1))
 
+# Use dplyr to calculate and save the columns which map to the mean and standard deviation for the getShape features (pred_SV). 
 df = df %>%
   mutate(
     ID = stringerID,
@@ -59,7 +59,6 @@ df = df %>%
      POST_EP_sd = sd(pred_POST$EP, na.rm = TRUE) 
          )
 
-#write(df, file = stringerCSV, append = TRUE, sep = "\t")
-
+# Save the 1 row dataframe, which will be appended into one large dataframe in the python script 
 write.csv(df, file = stringerCSV, row.names = FALSE, )
 
