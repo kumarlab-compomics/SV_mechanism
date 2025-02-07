@@ -27,7 +27,7 @@ filenamenoext=$(basename "${filename%.*}")
 # 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
 
 # We push this python script to generate bed files which represent the 2000bp flanking regions, these will be used for intersections with bedtools
-python adding_SVcoords_230321.py \
+python adding_SVcoords.py \
 ${files} \
 $1 $2 \
 ${filenamenoext} \
@@ -48,7 +48,7 @@ for i in {1..9};
 	done
 
 # We push this python script which takes in these counts and merges + defines the greatest level for a region
-python adding_flankRLoop_240521.py \
+python adding_flankRLoop.py \
 ${files} \
 $1 $2 \
 ${filenamenoext} \
@@ -87,7 +87,7 @@ for i in 'LINE' 'Low_complexity' 'LTR' 'Satellite' 'Simple_repeat' 'SINE' ;
 -files /home/nboev/projects/def-sushant/nboev/data/RepeatMasker/postprocessed/${i}.post_forbedtools.bed \
 > /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/CHROM/premerge/${filenamenoext}.${i}.flanks.bed
 
-	python adding_flankRepeatMasker_240521.py \
+	python adding_flankRepeatMasker.py \
 ${files} \
 $1 $2 \
 ${filenamenoext} \
@@ -114,7 +114,7 @@ for index in ${!array[*]};
 -files /home/nboev/projects/def-sushant/nboev/data/nonBDNA/${array[$index]}/processed/CHROM.${array[$index]}forbedtools.bed \
 > /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/CHROM/premerge/${filenamenoext}.${array[$index]}.flanks.bed
 
-	python adding_flanknonBDNA_240521.py \
+	python adding_flanknonBDNA.py \
 ${files} \
 $1 $2 \
 ${filenamenoext} \
