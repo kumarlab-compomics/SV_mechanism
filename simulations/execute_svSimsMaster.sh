@@ -9,19 +9,22 @@
 #SBATCH --error=MastersvSim%j.e
 #SBATCH --array=0-25
 
-# in this script, we need to push each chromosome through job arrays
+# Loading in virtual environment and modules
 module --force purge ; module load StdEnv/2020
 source $HOME/virtenv/bin/activate
 module load gcc/9.3.0 r/4.0.2
 module load scipy-stack
 
-# Use this version to allow for scratch space to be used instead
-# dirs that need to be created before running:
-# in scratch:/home/nboev/scratch/data/SimulatedSVs/CPTAC3/bf584e4c-f981-473e-b40a-c73d7f3699d2.wgs.sanger_raw_pindel.raw_somatic_mutation with filenamesIND  parameterIND  rawIND dirs
-# in the sim dir: /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/CPTAC3/bf584e4c-f981-473e-b40a-c73d7f3699d2.wgs.sanger_raw_pindel.raw_somatic_mutation with logIND  processedIND dirs
-
+# To run 24 jobs in array, based on this list of chromosomes
 names=($(cat ../preprocess/chromos.txt))
 files=${names[${SLURM_ARRAY_TASK_ID}]}
+
+# The input: 
+# 1: Project name and location
+# 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
+# 3: The name of the file to annotate 
+
+# This script leverages "scratch" space on an HPC given many files will be generated. The following creates directories to hold the files produced in scratch + those in the project space (for long term storage)
 
 mkdir /home/nboev/scratch/data/SimulatedSVs/$1
 mkdir /home/nboev/scratch/data/SimulatedSVs/$1/$2
@@ -35,6 +38,7 @@ mkdir /home/nboev/scratch/data/SimulatedSVs/$1/$2/parameterIND/${files}
 mkdir /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}
 mkdir /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/$1/$2/processedIND/${files}
 
+# We push this python script to create SURVIVOR configuration file used for SV simulation generation
 python generating_lensIND_240424.py \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/SVlen/$3 \
 ${files} \
@@ -42,6 +46,7 @@ parameter_file \
 $1 $2 \
 >> /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/$1/$2/generating_lensIND_240424.py.txt
 
+# Getting a list of the number of SVs we will need to batch across. In this case I have chosen 250 real SVs to simulate in each batch
 ls /home/nboev/scratch/data/SimulatedSVs/$1/$2/parameterIND/${files}/ \
 > /home/nboev/scratch/data/SimulatedSVs/$1/$2/filenamesIND/filenames.${files}.txt
 
@@ -55,6 +60,7 @@ echo "${splits}"
 ls /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/${files}.split* \
 > /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/splitnames.txt
 
+# We now have to alter some parameters within the execute_SurvivorTemplate_240716.sh script, adjusted for each chromosome + number of splts required
 cp execute_SurvivorTemplate_240716.sh \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh
 
@@ -63,12 +69,10 @@ sed -i "s/LOCATION/$2/g" /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${fi
 sed -i "s/array=0-0/array=0-${splits}/g" /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh
 sed -i "s/CHROM/${files}/g" /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh
 
+# We push the sbatch command script for this particular chromosome
 sbatch /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/${files}/execute_Survivor_${files}.sh $1 $2
 
-
-# How to run: change this location!
-
-# Running on 20220422_3202_phased_SNV_INDEL_SV_bychrom dataset = 2024/07/25
+# example: 
 # sbatch execute_svSimsMasterINDPAR1_240716.sh 20220422_3202_phased_SNV_INDEL_SV_bychrom SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
 
 
