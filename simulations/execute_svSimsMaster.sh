@@ -46,7 +46,7 @@ parameter_file \
 $1 $2 \
 >> /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/$1/$2/generating_lensIND_240424.py.txt
 
-# Getting a list of the number of SVs we will need to batch across. In this case I have chosen 250 real SVs to simulate in each batch
+# Getting a list of the number of configuration files for this chromosome. In this case, I have chosen to batch across 250 real SVs for simulations
 ls /home/nboev/scratch/data/SimulatedSVs/$1/$2/parameterIND/${files}/ \
 > /home/nboev/scratch/data/SimulatedSVs/$1/$2/filenamesIND/filenames.${files}.txt
 
