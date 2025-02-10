@@ -47,7 +47,7 @@ cat ${files} | while read line;
         if [[ ${line} == *"INS"* ]]; then
                 echo "insertion"
 
-                python /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/20220422_3202_phased_SNV_INDEL_SV_bychrom/generating_vcfINS_240430.py \
+                python generating_vcfINS_240430.py \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.insertions.fa \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.bed \
 CHROM ${line} \
@@ -61,7 +61,7 @@ CHROM ${line} \
             	echo "deletion"
                 rm /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.insertions.fa
 
-                python /home/nboev/projects/def-sushant/nboev/data/SimulatedSVs/20220422_3202_phased_SNV_INDEL_SV_bychrom/generating_vcfDEL_240430.py \
+                python generating_vcfDEL_240430.py \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.bed \
 CHROM ${line} \
 100 \
