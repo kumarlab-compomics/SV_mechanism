@@ -30,7 +30,7 @@ for i in X Y 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 ;
 	do
 	for j in deletion insertion;
 		do
-		python analysis_mechIDsvSim_240625.py \
+		python analysis_mechIDsvSim.py \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/zscore/chr${i}.20240625.chr${i}.${j}_FeatMatrixzscore.csv \
 chr${i} ${j} \
 $1 $2 \
