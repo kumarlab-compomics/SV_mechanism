@@ -36,8 +36,9 @@ An example of the use of this command is :
 
 ```
 sbatch execute_svSimsMaster.sh \
-20220422_3202_phased_SNV_INDEL_SV_bychrom \
-SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
+HGSVC2 \
+sv \
+variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
 ```
 
 In the end you should have two large vcfs/csvs that represent the real and simulated SVs. The simulated csv should be 100x the size of the real csv
