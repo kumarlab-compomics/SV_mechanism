@@ -32,7 +32,7 @@ The requirements for this command includes:
 - HG38 reference genome. 
 - Scratch space, if using an HPC.
 
-An example of the use of this command is : 
+An example of the use of this command is from inside the ./simulations directory should be : 
 
 ```
 sbatch execute_svSimsMaster.sh \
