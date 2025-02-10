@@ -11,15 +11,21 @@ from pytz import timezone
 print('\n**********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
+# In this script, we merge all the annotated files into a merged csv as per unique SV's identifiers
+# This script includes lots of printing, allowing for tracking across the different features. Ensure the expected number of SVs are found across the merges
+
 project = str(argv[1])
 loc = str(argv[2])
 filename = str(argv[3])
 chr = str(argv[4])
 typer = str(argv[5])
 
-# Seq features - variant
+# Annotation : Sequence features of SVs (adding_seqFeaturesSV.py)
 feat = pd.read_csv(str(argv[6]), comment='#', sep='\t')
 
+# We want to standardize the SV type (for example, could be INS or insertion). 
+# Next, we filter and standardize the ID column to allow for proper merging at the end 
+# These steps are repeated a few times throughout this script
 types = feat.SV_Type.unique()
 if ('deletion' in types) | ('insertion' in types) :
 	if typer == 'DEL':
@@ -33,16 +39,14 @@ elif ('DEL' in types) | ('INS' in types):
 		type = 'INS'
 
 feat = feat[(feat.CHROM == chr) & (feat.SV_Type == type)]
-print(feat.head())
 
-# were missing some columns!! need to add the way a way to add ID here!!!
 for idx, row in feat.iterrows():
 	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
 		feat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		feat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
 
-# REACLL!!! THIS WILL NEED TO CHANGE!!! WE NEED TO SAY.. CONTAINS!
+# Depending on if we have a simulation vcf or real vcf, we include different columns. This will be required for the z-score/ homology annotations
 if ('SIM' in loc ) | ('sim' in loc ) | ('Sim' in loc ):
 	feat_filt = feat[['ID', 'var_gc', 'var_comp', 'var_flex', 'var_stab', 'Sim', 'Sim_ID']]
 else:
@@ -51,18 +55,14 @@ else:
 feat_filt = feat_filt.replace(np. nan,0)
 feat_filt = feat_filt.reset_index(drop=True)
 
-# Getting the correct number of rows we should end with
-ogrows = len(feat_filt)
-print('number of rows we expect', ogrows)
-
+# Checking the head and number of rows for this feature
 print(feat_filt.head())
 print('number of lines from feat_filt', len(feat_filt.ID.unique()))
 
-# Seq features - flanks
+# Annotation : Sequence features of flanks (adding_seqFeatures.py)
 flankfeat = pd.read_csv(str(argv[7]), comment='#', sep='\t')
 flankfeat = flankfeat[(flankfeat.CHROM == chr) & (flankfeat.SV_Type == type)]
 
-# were missing some columns
 for idx, row in flankfeat.iterrows():
 	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
 		flankfeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
@@ -77,29 +77,24 @@ flankfeat = flankfeat.reset_index(drop=True)
 print(flankfeat.head())
 print('number of lines from flankfeat', len(flankfeat.ID.unique()))
 
-
-# Repeat Masker - variant
+# Annotation : Repeat Masker within SV (adding_searchRepeatMaskermerges.py)
 repSV = pd.read_csv(str(argv[8]), comment='#', sep='\t')
 repSV = repSV[(repSV.CHROM == chr) & (repSV.SV_Type == type)]
 
-# ALTERNG THIS TO INCLUDE SUBCLASSES!!
+# In this case, we are only using a binary indicator for if a repeat masker class was identified 
 for idx, row in repSV.iterrows():
 	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
 		repSV.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repSV.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
-
 	if 'Simple_repeat' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'Simple_repeat_logic'] = 1
 	else:
 		repSV.loc[idx, 'Simple_repeat_logic'] = 0
-
 	if 'Low_complexity' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'Low_complexity_logic'] = 1
 	else:
 		repSV.loc[idx, 'Low_complexity_logic'] = 0
-
-# differing between l1 vs l2
 	if 'LINE/L1' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'LINE1_logic'] = 1
 	else:
@@ -112,8 +107,6 @@ for idx, row in repSV.iterrows():
 		repSV.loc[idx, 'CR1_logic'] = 1
 	else:
 		repSV.loc[idx, 'CR1_logic'] = 0
-
-# differing between SINEs
 	if 'SINE/Alu' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'Alu_logic'] = 1
 	else:
@@ -122,8 +115,6 @@ for idx, row in repSV.iterrows():
 		repSV.loc[idx, 'MIR_logic'] = 1
 	else:
 		repSV.loc[idx, 'MIR_logic'] = 0
-
-# adding ltr erv elements
 	if 'LTR/ERV' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'ERV_logic'] = 1
 	else:
@@ -132,13 +123,10 @@ for idx, row in repSV.iterrows():
 		repSV.loc[idx, 'Gypsy_logic'] = 1
 	else:
 		repSV.loc[idx, 'Gypsy_logic'] = 0
-
 	if 'Satellite' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'Satellite_logic'] = 1
 	else:
 		repSV.loc[idx, 'Satellite_logic'] = 0
-
-# adding SVA elements
 	if 'Retroposon/SVA' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'SVA_logic'] = 1
 	else:
@@ -152,7 +140,9 @@ repSV = repSV.reset_index(drop=True)
 print(repSV.head())
 print('number of lines from repSV', len(repSV.ID.unique()))
 
-# Repeat Masker - flanks, now its separate files for each annotation
+# Annotation : Repeat Masker within flanks (adding_flankRepeatMasker.py)
+# Recall, in this case, we had a bed file to annotate a number of classes from Repeat Masker. 
+# Therefore, we have to separately clean these
 repLINE = pd.read_csv(str(argv[9]), comment='#', sep='\t')
 repLINE = repLINE[(repLINE.CHROM == chr) & (repLINE.SV_Type == type)]
 for idx, row in repLINE.iterrows():
@@ -219,6 +209,9 @@ repSINE = repSINE[['ID', 'SINE_sum']]
 print(repSINE.head())
 print('number of lines from rep', len(repSINE.ID.unique()))
 
+# Annotation : nonB DNA motifs within flanks (adding_flanknonBDNA.py)
+# Recall, in this case, we had a bed file to annotate a number of classes from non B DNA gfa
+# Therefore, we have to separately clean these
 nonbAPR = pd.read_csv(str(argv[15]), comment='#', sep='\t')
 nonbAPR = nonbAPR[(nonbAPR.CHROM == chr) & (nonbAPR.SV_Type == type)]
 for idx, row in nonbAPR.iterrows():
@@ -285,8 +278,8 @@ nonbZ = nonbZ[['ID', 'ZDNA_sum']]
 print(nonbZ.head())
 print('number of lines from nonb', len(nonbZ.ID.unique()))
 
-
-# Chromoband of breakpoint
+# Annotation : Chromoband state of breakpoints (adding_chromoBand.py)
+# This is annotated as dummy variables
 chromoband = pd.read_csv(str(argv[21]), comment='#', sep='\t')
 chromoband = chromoband[(chromoband.CHROM == chr) & (chromoband.SV_Type == type)]
 for idx, row in chromoband.iterrows():
@@ -300,10 +293,11 @@ chromoband_dum = chromoband_dum.reset_index(drop=True)
 print(chromoband_dum.head())
 print('number of lines from chromoband_dum', len(chromoband_dum.ID.unique()))
 
-# Blast results  - variants and flanks
+# Annotation : Local homology between the SV-preflank, SV-postflank, preflank-postflank (adding_Blastmerges.py)
+# In this case, we are calculating "coverage" values based on the expected lengths
+	# For SV-preflank, SV-postflank : The denominator is the length of the SV
+	# For preflank-postflank : The denominator is 2000bp (ie. the length of one side of the flank)
 blast = pd.read_csv(str(argv[22]), comment='#', sep='\t')
-print(blast.head())
-
 blast = blast[(blast.CHROM == chr) & (blast.SV_Type == type)]
 blast[['chr', 'pos', 'len', 'type']] = blast['ID'].str.split('_',  expand=True)
 blast[["pos", "len"]] = blast[["pos", "len"]].apply(pd.to_numeric)
@@ -325,7 +319,7 @@ blast = blast.reset_index(drop=True)
 print(blast.head())
 print('number of lines from blasting', len(blast.ID.unique()))
 
-# Epigenetics results - depends on type of variant we're doing
+# Annotation : Epigenetics from the flank (adding_epiFeaturesflanks.py)
 epifeat = pd.read_csv(str(argv[23]), comment='#', sep='\t')
 epifeat = epifeat[(epifeat.CHROM == chr) & (epifeat.SV_Type == type)]
 for idx, row in epifeat.iterrows():
@@ -341,7 +335,7 @@ epifeat = epifeat.reset_index(drop=True)
 print(epifeat.head())
 print('number of lines from epifeat', len(epifeat.ID.unique()))
 
-# Adding DNA shape features
+# Annotation : DNA shape features of the SV, preflank and postflank (adding_BlastDNAShape.py)
 shape = pd.read_csv(str(argv[24]), sep='\t')
 shape[['chr', 'pos', 'len', 'type']] = shape['ID'].str.split('_',  expand=True)
 shape[["pos", "len"]] = shape[["pos", "len"]].apply(pd.to_numeric)
@@ -359,8 +353,7 @@ shape = shape.reset_index(drop=True)
 print(shape.head())
 print('number of lines from shape', len(shape.ID.unique()))
 
-
-# Repliseq value at breakpoint
+# Annotation : Replication timing of the SV position/ breakpoint (adding_RepliSeq.py)
 repli = pd.read_csv(str(argv[25]), sep='\t')
 repli = repli[(repli.CHROM == chr) & (repli.SV_Type == type)]
 for idx, row in repli.iterrows():
@@ -372,7 +365,7 @@ repli = repli[['ID', 'S50']]
 print(repli.head())
 print('number of lines from repli', len(repli.ID.unique()))
 
-# Rloop flank data
+# Annotation : Max Rloop level within the flanks (adding_flankRLoop.py)
 rloop = pd.read_csv(str(argv[26]), sep='\t')
 rloop = rloop.rename(columns={'unique_id': 'ID'})
 rloop[['chr', 'pos', 'len', 'type']] = rloop['ID'].str.split('_',  expand=True)
@@ -391,6 +384,9 @@ rloop = rloop.reset_index(drop=True)
 print(rloop.head())
 print('number of lines from Rloop', len(rloop.ID.unique()))
 
+# If we are annotating insertions, we have no other features to merge. If you are annotating deletions, you must also add the epigenetic features from the deleted sites.
+# In either case, you append all the dataframes together, and clean up the column names
+
 if (type == 'insertion') | (type=='INS'):
 	dataframes = [feat_filt, flankfeat, repSV, repLINE, repLOW, repLTR, repSAT, repSIM, repSINE, nonbAPR, nonbDR, nonbGQ, nonbMR, nonbSTR, nonbZ, chromoband_dum, blast, epifeat, shape, repli, rloop]
 	results = dataframes[0]
@@ -406,6 +402,8 @@ if (type == 'insertion') | (type=='INS'):
 	newrows = len(results)
 	print('number of rows we got', newrows)
 
+
+# Annotation : Epigenetics from the SV (adding_epiFeaturesSV.py)
 elif (type == 'deletion') | (type=='DEL'):
 	epi = pd.read_csv(str(argv[27]), comment='#', sep='\t')
 	epi = epi[(epi.CHROM == chr) & (epi.SV_Type == type)]
@@ -418,9 +416,6 @@ elif (type == 'deletion') | (type=='DEL'):
 	epi = epi.loc[:, epi.columns.str.contains('ID|avg|slope|std')]
 	epi = epi.replace(np. nan,0)
 	epi = epi.reset_index(drop=True)
-
-# I don't think we need this!
-#	epi = epi.drop(columns=['Sim_ID'])
 
 	print(epi.head())
 	print('number of lines from epi', len(epi.ID.unique()))
@@ -439,6 +434,7 @@ elif (type == 'deletion') | (type=='DEL'):
 	newrows = len(results)
 	print('number of rows we got', newrows)
 
+# Save the final merged file for this SV type, chromosome and this split
 results.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/merge_FeatMatrix/'+chr+'/' +filename+'.'+typer+ '.FeatMatrix.csv', sep='\t', index=False)
 
 print('END TIME:', datetime.datetime.now(timezone('EST')))
