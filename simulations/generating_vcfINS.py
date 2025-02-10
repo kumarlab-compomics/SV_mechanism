@@ -12,6 +12,7 @@ print('\n ********************************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
 # In this script, we will take the simulated fasta and bed files from SURVIVOR to generate a vcf-like file, which we will use to annotate and compare to the real SV
+# This script is only used when requesting simulations for insertions
 
 # Data inputs sent in from the execution files
 fastafile = str(argv[1])
