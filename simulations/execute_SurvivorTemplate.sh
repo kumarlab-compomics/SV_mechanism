@@ -47,7 +47,7 @@ cat ${files} | while read line;
         if [[ ${line} == *"INS"* ]]; then
                 echo "insertion"
 
-                python generating_vcfINS_240430.py \
+                python generating_vcfINS.py \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.insertions.fa \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.bed \
 CHROM ${line} \
@@ -61,7 +61,7 @@ CHROM ${line} \
             	echo "deletion"
                 rm /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.insertions.fa
 
-                python generating_vcfDEL_240430.py \
+                python generating_vcfDEL.py \
 /home/nboev/scratch/data/SimulatedSVs/$1/$2/rawIND/CHROM/${split}/${line}.bed \
 CHROM ${line} \
 100 \
