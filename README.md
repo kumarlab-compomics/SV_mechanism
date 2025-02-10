@@ -9,9 +9,7 @@ This is done by:
   
 The purpose of this is to better describe potential mechanisms of SV introduction, namely double strand break (DSB) repair. As such, SVs, their breakpoints and their flanking sequences are annotated with a number of features. These features include sequence, DNA accessibility, Replication Timing, repetitive elements, nonB DNA structures, and DNA shape. To robustly describe real SVs, we then generate 100 simulated SVs which match in the real SVs' length, type and chromosome. This therefore, allows for z-score standardization across all these features. 
 
-## Data requirements
-
-### Structural Variants (SVs)
+## Step 0 : Real structural variant (SV) source
 
 A vcf or csv containing resolved insertions and/or deletions of 50bp or greater. This file must contain a unique list of SVs with the following columns
 
@@ -21,9 +19,35 @@ A vcf or csv containing resolved insertions and/or deletions of 50bp or greater.
 -  SVlen; SV length
 -  SV_Type; SV type (accepted: INS, DEL, insertion, deletion)
 
-### Human genome reference
+For example: For HGSVC2, you should have a directory under ./preprocess/HGSVC2/SVlen
+- Whereby, you have this file saved here: ./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
 
-Initial version was built using HG38. 
+## Step 1 : Generating simulated SVs
+
+Our goal is to use underlying repair features to better discriminate between DSB repair mechanisms. Since we are using SVs (50bp+), we noted that when calculating features such as mean GC content, the local or SV's GC content could depend on the SV length, chromosome of origin and the SV type. We therefore wanted to standardize numeric features. To do this rigorously, we generated 100 simulations for each real and unique SV. These simulations were generated using SURVIVOR. The simulations matched the real SVs in their: chromosome, length and type. 
+
+The requirements for this command includes: 
+- The "real" vcf/ csv which will be used to generate simulated SVs
+- The SURVIVOR tool
+- HG38 reference genome. 
+- Scratch space, if using an HPC.
+
+An example of the use of this command is : 
+
+```
+sbatch execute_svSimsMaster.sh \
+20220422_3202_phased_SNV_INDEL_SV_bychrom \
+SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
+```
+
+In the end you should have two large vcfs/csvs that represent the real and simulated SVs. The simulated csv should be 100x the size of the real csv
+
+For example: For HGSVC2, you should have two directories under ./preprocess/HGSVC2
+- Whereby you've added : ./preprocess/HGSVC2/svSIM/SVlen/variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
+
+## Step 2 : Annotating real and simulated SVs
+
+
 
 ### DNA accessibility
 
@@ -44,25 +68,6 @@ In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was 
 
 Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome _. This file was further processed using Repliseq to describe genomic locations by their S50. 
 
-## Step 1 : Generating simulated SVs
-
-Our goal is to use underlying repair features to better discriminate between DSB repair mechanisms. Since we are using SVs (50bp+), we noted that when calculating features such as mean GC content, the local or SV's GC content could depend on the SV length, chromosome of origin and the SV type. We therefore wanted to standardize numeric features. To do this rigorously, we generated 100 simulations for each real and unique SV. These simulations were generated using SURVIVOR. The simulations matched the real SVs in their: chromosome, length and type. 
-
-The requirements for this command includes: 
-- The "real" vcf/ csv which will be used to generate simulated SVs
-- The SURVIVOR tool
-- HG38 reference genome
-- Scratch space, if using an HPC.
-
-An example of the use of this command is : 
-
-```
-sbatch execute_svSimsMaster.sh \
-20220422_3202_phased_SNV_INDEL_SV_bychrom \
-SVTrue_typedeletion_resTrue SVTrue_typedeletion_resTrue.csv
-```
-
-## Step 2 : Annotating real and simulated SVs
 
 Due to the size and scale of SVs in whole genome population-level studies, SVs from the vcf are split by chromosome, then further batched. Using HPC resources, each batch is then annotated automatically and in parallel using the execute_Master1.sh. From this master script, the following batch scripts, and python scripts, are triggered :
 
