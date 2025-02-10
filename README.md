@@ -20,7 +20,7 @@ A vcf or csv containing resolved insertions and/or deletions of 50bp or greater.
 -  SV_Type; SV type (accepted: INS, DEL, insertion, deletion)
 
 For example: For HGSVC2, you should have a directory under ./preprocess/HGSVC2/SVlen
-- Whereby, you have this file saved here: ./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
+- Whereby, you have this file saved here: ./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
 
 ## Step 1 : Generating simulated SVs
 
@@ -38,7 +38,7 @@ An example of the use of this command is :
 sbatch execute_svSimsMaster.sh \
 HGSVC2 \
 sv \
-variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
+variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
 ```
 
 In the end you should have two large vcfs/csvs that represent the real and simulated SVs. The simulated csv should be 100x the size of the real csv
