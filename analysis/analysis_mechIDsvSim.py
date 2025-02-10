@@ -12,39 +12,28 @@ import seaborn as sns
 print('\n **********************')
 print('START TIME:', datetime.datetime.now(timezone('EST')))
 
-# Getting the merged feature matrix
-print(argv[1])
+# In this script, we take in a vcf/csv batch file that we have annotated and label the real SVs with their local homology label
+# Recall, the file we are passing in contains both real and simulated SVs. Therefore, some filtering will be required.
+
+# Data inputs sent in from the execution files
 chromo = str(argv[2])
 type = str(argv[3])
 project = str(argv[4])
 loc = str(argv[5])
-
-# this holds the identities of each sv
 result = pd.read_csv(str(argv[1]), comment='#', sep='\t')
-print(result.columns)
-print(result.head())
-print(len(result))
-#print(result[result.ID == 'chrX-268206-DEL-103'].columns)
-#print(result[result.ID == 'chrX-268206-DEL-103'][['Sim_ID']])
 
-# Recall = we are going to use only the real SVs here and only using the ones where we had 101 sims
-#result = result[result['Sim_ID'].str.contains('chr')==False]
+# Here is the filtering. We require the Sim binary column to be False. We also require SURVIVOR was successfully able to generate 100 simulations for this real SV
 result = result[result['Sim'] == False]
 result = result[result.n_zscore==101]
-print(result.head())
-print(len(result))
 
 ids = list(result.ID)
-
 result[['chr','POS', 'type', 'len']] = result['ID'].str.split('-',expand=True)
 result["len"] = pd.to_numeric(result["len"])
 result = result.drop(['ID','chr', 'POS', 'type'] , axis=1)
-
-print(result.columns)
 forced = result
 
-# IN THIS VERSION, WE'RE GOING TO GET ALL THE LABELS SEPARATELY
-# For labelling purposes, we will NOT be using the percentiles from the columns, just the raw value
+# We use the prepost_Blastcoverage and prepost_pident columns from the Blast annotations (processing to calculate the coverage)
+# Based on the thresholds, we label SVs with either a : HR, NHEJ, SSAaEJ or Undefined label. These labels are akin to the HLH, NLH, ILH and Undefined labels in the manuscript
 
 for idx, row in forced.iterrows():
 	if (row.prepost_Blastcoverage>0.25) & (row.prepost_pident>90):
@@ -55,28 +44,10 @@ for idx, row in forced.iterrows():
 		forced.loc[idx, 'mechID_homo'] = 'SSAaEJ'
 	else:
 		forced.loc[idx, 'mechID_homo'] = 'Undefined'
-'''
-for idx, row in forced.iterrows():
-	if (row.STR_sum >1 ) & (row.Simple_repeat_sum > 1 ) & (row.Simple_repeat_logic == 1) :
-		forced.loc[idx, 'mechID_slip'] = 'HSlip'
-	else:
-		forced.loc[idx, 'mechID_slip'] = 'LSlip'
-
-
-for idx, row in forced.iterrows():
-	if (row.RLoop >3 ) & (row.G4_sum > 1 ) :
-		forced.loc[idx, 'mechID_rloop'] = 'HRLoop'
-	else:
-		forced.loc[idx, 'mechID_rloop'] = 'LRLoop'
-
-
-forced['mechID'] = forced["mechID_homo"] + "_" + forced["mechID_slip"]+"_" + forced["mechID_rloop"]
-'''
 
 forced['ID'] = ids
 
-print(forced.head())
-
+# Save the final labelled file
 forced.to_csv('/home/nboev/projects/def-sushant/nboev/analysis/'+project+'/'+loc+'/IDmechsvSIM/20240625/'+chromo+'.'+type+'_ID0625.tsv', sep='\t', index=False)
 
 print('end of script')
