@@ -11,7 +11,13 @@ The purpose of this is to better describe potential mechanisms of SV introductio
 
 ## Step 0 : Real structural variant (SV) source
 
-A vcf or csv containing resolved insertions and/or deletions of 50bp or greater. This file must contain a unique list of SVs with the following columns
+Start with a vcf with SVs. For example, you can download and place the integrated callset from HGSVC2 here:
+
+```
+wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/HGSVC2/release/v2.0/integrated_callset/variants_freeze4_sv_insdel_alt.vcf.gz -P ./data/HGSVC2/
+```
+
+Next, this vcf should then be manipulated to contain: resolved insertions and/or deletions of 50bp or greater. This file must contain a unique list of SVs with the following columns:
 
 -  CHROM; Chromosome
 -  POS; Breakpoint position
@@ -19,8 +25,11 @@ A vcf or csv containing resolved insertions and/or deletions of 50bp or greater.
 -  SVlen; SV length
 -  SV_Type; SV type (accepted: INS, DEL, insertion, deletion)
 
-For example: For HGSVC2, you should have a directory under ./preprocess/HGSVC2/SVlen
-- Whereby, you have this file saved here: ./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
+This file should be saved here:
+
+```
+./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
+```
 
 ## Step 1 : Generating simulated SVs
 
