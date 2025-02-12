@@ -25,7 +25,7 @@ Next, this vcf should then be manipulated to contain: resolved insertions and/or
 -  SVlen; SV length
 -  SV_Type; SV type (accepted: INS, DEL, insertion, deletion)
 
-This file should be saved here:
+As per our example, the file should be saved here:
 
 ```
 ./preprocess/HGSVC2/SVlen/sv/variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
@@ -41,19 +41,22 @@ The requirements for this command includes:
 - HG38 reference genome. 
 - Scratch space, if using an HPC.
 
-An example of the use of this command is from inside the ./simulations directory should be : 
+An example of the use of this command is from inside the ```./simulations``` directory should be : 
 
 ```
+cd simulations
+
 sbatch execute_svSimsMaster.sh \
 HGSVC2 \
 sv \
 variants_freeze4_sv_insdel_alt.vcf.SVlength.csv
 ```
 
-In the end you should have two large vcfs/csvs that represent the real and simulated SVs. The simulated csv should be 100x the size of the real csv
+In the end you should have two large vcfs/csvs that represent the real and simulated SVs. The simulated csv should be 100x the size of the real csv. Therefore, as per the HGSVC file, you should have the simulated vcf-like file here:
 
-For example: For HGSVC2, you should have two directories under ./preprocess/HGSVC2
-- Whereby you've added : ./preprocess/HGSVC2/svSIM/SVlen/variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
+```
+./preprocess/HGSVC2/SVlen/svSIM/variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv
+```
 
 ## Step 2 : Annotating real and simulated SVs
 
