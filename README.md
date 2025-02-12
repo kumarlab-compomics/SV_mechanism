@@ -209,7 +209,7 @@ Upon generating the dataframes which hold features' z-scores, we can now begin l
 For the HGSVC2 dataset, we would use the following : 
 
 ```
-../analysis
+cd ../analysis
 
 sbatch execute_mechIDsvSim.sh \
 HGSVC2 \
