@@ -41,6 +41,11 @@ The requirements for this command includes:
 - HG38 reference genome. 
 - Scratch space, if using an HPC.
 
+To start the ``` execute_svSimsMaster.sh ``` script the following arguments must be provided:
+1. The project name
+2. 'sv' given we are generating simulated SVs held in the sv directory
+3. The name of the vcf-like file we created in Step 0. 
+
 An example of the use of this command is from inside the ```./simulations``` directory should be : 
 
 ```
@@ -60,55 +65,74 @@ In the end you should have two large vcfs/csvs that represent the real and simul
 
 ## Step 2 : Annotating real and simulated SVs
 
+Next, we want to annotate the real and simulated vcf-like files. [See more details about how and which features are annotated, along with data requirements.]
+
+Due to the scale and size of the whole-genome population-level studies, the vcf-like files are split by chromosome, then further batched into 10K SVs. For each chromosome, a set of bash scripts are deployed in parallel, which then starts bash and python scripts to annotate each batch. 
+
+To start the ``` execute_Master1.sh ``` script the following arguments must be provided:
+1. The project name
+2. sv or svSIM, depending on the file we are annotating
+3. The name of the file to annotate
+4. The name of directory used to store epigenetic data 
+   
+As per our HGSVC2 example, the following should be deployed to annotate the real and simulated SVs. In this case, we will use H1-hESCs as the epigenetic proxy.
+
+```
+cd ../preprocess
+
+sbatch execute_Master1.sh \
+HGSVC2 \
+sv \
+variants_freeze4_sv_insdel_alt.vcf.SVlength.csv \
+H1
+
+sbatch execute_Master1.sh \
+HGSVC2 \
+svSIM \
+variants_freeze4_sv_insdel_alt.vcf.SVlength.Simulations.csv \
+H1
+```
+
+In ``` execute_Master1.sh ``` the following bash scripts are copied and customized to start the correct number of array jobs, as per the number of batches. Within these bash scripts, python scripts are then executed. 
+
+- ``` execute_seqFeaturesSVTemplate.sh ``` : To calculate sequence features of the SVs' sequences
+  - ``` adding_seqFeaturesSV.py ```
+- seqFeatures;
+- flankSeq ;
+- SVcoords ;
+- RepliSeq ;
+- searchRepeatMasker ;
+- ``` execute_ENCODETemplate.sh``` : To calculate SV and flanking epigenetic profiles
+  - ``` adding_epiFeaturesSV.py ``` 
+  - ``` adding_epiFeaturesflanks.py ``` 
 
 
-### DNA accessibility
+need to include merging after this... 
+
+### Data required for annotations
+
+#### DNA accessibility
 
 We annotated deleted regions, along with the flanks of insertions and deletions. Bigwigs which map to Chip-seq, DNase-seq and WGB-seq were gathered from ENCODE. For germline SVs, we used experiments conducted in H1-hESCs. The following experiments and accessibility markers were used
 
 - ENCBS111ENC (DNase-seq, WGB-seq+, WGB-seq-); https://www.encodeproject.org/biosamples/ENCBS111ENC/ 
 - ENCBS718AAA (CTCF, H2AFZ, H3K27ac, H3K27me3, H3K36me3, H3K4me1, H3K79me2, H3K9ac, H3K9me3, H4Kme1); https://www.encodeproject.org/biosamples/ENCBS718AAA/
 
-### non-B DNA structures
+#### non-B DNA structures
 
 To annotate non-B DNA structures in flanking regions, files from https://nonb-abcc.ncifcrf.gov/apps/ftp/browse were further processed by collapsing regions into bed files. 
 
-### Repeat Masker motifs
+#### Repeat Masker motifs
 
 In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was processed into bed files to characterize known sites of LINE, Low complexity, LTRs, Satellites, simple repeats and SINEs. 
 
-### Replication Timing 
+#### Replication Timing 
 
 Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome _. This file was further processed using Repliseq to describe genomic locations by their S50. 
 
 
-Due to the size and scale of SVs in whole genome population-level studies, SVs from the vcf are split by chromosome, then further batched. Using HPC resources, each batch is then annotated automatically and in parallel using the execute_Master1.sh. From this master script, the following batch scripts, and python scripts, are triggered :
 
-- execute_seqFeaturesSV.sh
-  - adding_seqFeaturesSV_240118.py
-- seqFeatures;
-- flankSeq ;
-- SVcoords ;
-- RepliSeq ;
-- searchRepeatMasker ;
-- ENCODE ;
 
-When running the master batch script, the following arguments must be provided : 
-
-- Directory which holds the Project
-- Subdirectly which holds the vcf
-- Name of the vcf
-- Directory to point to cell line used for DNA accessibility annotation
-
-An example of the use of this command is: 
-```
-sbatch execute_Master1_240502.sh \
-allHGSVC3_20240415_Freeze4_GRCh38 \
-sv \
-freeze4_GRCh38_sv_insdel_alt.vcf.SVlength.csv \
-H1
-```
-need to include merging after this... 
 
 ## Step 3 : Calculating z-scores across features
 
