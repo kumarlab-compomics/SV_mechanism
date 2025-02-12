@@ -138,26 +138,49 @@ svSIM \
 H1
 ```
 
-### Data required for annotations ** need to work on this section !!
+### Data required for annotations
 
-#### DNA accessibility
+#### ``` execute_ENCODETemplate.sh ```
 
-We annotated deleted regions, along with the flanks of insertions and deletions. Bigwigs which map to Chip-seq, DNase-seq and WGB-seq were gathered from ENCODE. For germline SVs, we used experiments conducted in H1-hESCs. The following experiments and accessibility markers were used
+We annotated deleted regions, along with the flanks of insertions and deletions. We do so by using the ``` pyBigWig ``` module, along with a series of bigwigs provided by ENCODE. For our germline SVs, we use the H1-hESC cell line as a proxy for the epigenetic status of the genome. We begin by creating a directory here ``` ./data/ENCODE/H1 ```. We found in ENCODE, the Chip-Seq experiment and DNase-seq/WGB-seq experiment which were held H1 data was ENCBS718AAA and ENCBS111ENC, respectively. As such create the following directories
 
-- ENCBS111ENC (DNase-seq, WGB-seq+, WGB-seq-); https://www.encodeproject.org/biosamples/ENCBS111ENC/ 
-- ENCBS718AAA (CTCF, H2AFZ, H3K27ac, H3K27me3, H3K36me3, H3K4me1, H3K79me2, H3K9ac, H3K9me3, H4Kme1); https://www.encodeproject.org/biosamples/ENCBS718AAA/
+```
+mkdir /data/ENCODE/H1/ENCBS111ENC 
+mkdir /data/ENCODE/H1/ENCBS718AAA
 
-#### non-B DNA structures
+cd ENCBS111ENC
+mkdir DNase-seq WGB-Seq
+cd ../ENCBS718AAA
+mkdir CTCF H2AFZ H3K36me3 H3K9ac H3K9me3 H4K20me1 H3K4me1 H3K79me2 H3K27ac H3K27me3
+```
 
-To annotate non-B DNA structures in flanking regions, files from https://nonb-abcc.ncifcrf.gov/apps/ftp/browse were further processed by collapsing regions into bed files. 
+For these experiments refer to the following locations to download the appropriate big wigs. Use wget to download the bigwigs in the appropriate directory
 
-#### Repeat Masker motifs
+- For ENCBS111ENC : https://www.encodeproject.org/biosamples/ENCBS111ENC/
+- For ENCBS718AAA : https://www.encodeproject.org/biosamples/ENCBS718AAA/
 
-In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was processed into bed files to characterize known sites of LINE, Low complexity, LTRs, Satellites, simple repeats and SINEs. 
+#### ``` execute_RepliSeqTemplate.sh ```
 
-#### Replication Timing 
+[ re-do description + instructions ] 
 
 Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome _. This file was further processed using Repliseq to describe genomic locations by their S50. 
+
+We have provided the H1 processed Repli-Seq file here : ``` ./data/RepliSeq/H1/ ```
+
+
+#### ``` execute_SVcoordsTemplate.sh ```
+
+[ re-do description + instructions ] 
+
+ - To annotate non-B DNA structures in flanking regions, files from https://nonb-abcc.ncifcrf.gov/apps/ftp/browse were further processed by collapsing regions into bed files.
+ - In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was processed into bed files to characterize known sites of LINE, Low complexity, LTRs, Satellites, simple repeats and SINEs. 
+
+#### ``` execute_chromoBandTemplate.sh ```
+
+
+#### ``` execute_flankSeqTemplate.sh ```
+
+- basically all you need is the reference genome, which you already have
 
 
 ## Step 3 : Calculating z-scores across features
