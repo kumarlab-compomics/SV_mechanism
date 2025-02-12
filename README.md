@@ -38,12 +38,13 @@ Our goal is to use underlying repair features to better discriminate between DSB
 The requirements for this command includes: 
 - The "real" vcf/ csv which will be used to generate simulated SVs
 - The SURVIVOR tool
-- HG38 reference genome. 
+- HG38 reference genome
+  - This file should be stored as such : ```./data/Genome/hg38.fa ```
 - Scratch space, if using an HPC.
 
 To start the ``` execute_svSimsMaster.sh ``` script the following arguments must be provided:
 1. The project name
-2. 'sv' given we are generating simulated SVs held in the sv directory
+2. sv (given we are generating simulated SVs held in the sv directory)
 3. The name of the vcf-like file we created in Step 0. 
 
 An example of the use of this command is from inside the ```./simulations``` directory should be : 
@@ -106,6 +107,7 @@ In ``` execute_Master1.sh ``` the following bash scripts are copied and customiz
   - ``` adding_flankRepeatMasker.py ```
   - ``` adding_flanknonBDNA.py ```
 - ``` execute_chromoBandTemplate.sh ``` : To annotate the giemsa stain at an SV's position
+  - ``` adding_chromoBand.py ```
 - ``` execute_flankSeqTemplate.sh ``` : To extract reference genome sequences from the flanking coordinates. Next, we use these sequences to calculate sequence features, local homology (as per Blast alignments) and DNA shape
   - ``` adding_flankSeq.py ```
   - ``` adding_seqFeatures.py ```
@@ -117,9 +119,9 @@ In ``` execute_Master1.sh ``` the following bash scripts are copied and customiz
 - ``` execute_seqFeaturesSVTemplate.sh ``` : To calculate sequence features of the SVs' sequences
   - ``` adding_seqFeaturesSV.py ```
 
-Subject to successfully annotating each batch of SVs, we must then merge these annotations. We use the ``` execute_Master1Merge.sh ``` script, which requires the following arguments : 
+Subject to successful annotation of each SV batch, we then must merge these annotations. We use the ``` execute_Master1Merge.sh ``` script, which requires the following arguments : 
 1. The project name
-2. sv or svSIM, depending on the file we are annotating
+2. sv or svSIM, depending on the file we are merging
 3. The name of directory used to store epigenetic data 
 
 As per our HGSVC2 example, here are the commands for this merging script for both the real and simulated SVs
@@ -136,8 +138,7 @@ svSIM \
 H1
 ```
 
-
-### Data required for annotations
+### Data required for annotations ** need to work on this section !!
 
 #### DNA accessibility
 
@@ -159,12 +160,43 @@ In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was 
 Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome _. This file was further processed using Repliseq to describe genomic locations by their S50. 
 
 
-
-
-
 ## Step 3 : Calculating z-scores across features
 
+Now, that both the real and simulated SVs have been annotated, we will now match the real SVs to their matching simulations to calculate z-scores across the numeric features. We will use the ``` execute_Master1Zscore.sh ``` script to do this. The requirements are : 
+1. The project name
+2. sv
+3. svSIM
+
+Therefore, for the HGSVC2 example, we apply the following : 
+
+```
+sbatch execute_Master1Zscore.sh \
+HGSVC2 \
+sv \
+svSim
+```
+
 ## Step 4 : Applying the homology-based label to SVs
+
+Upon generating the dataframes which hold features' z-scores, we can now begin labeling SVs. We start by applying strict thresholds based on the up-downstream flanking alignments. We consider both the length and 'quality' of the gap-less alignment we obtained from Blast. To do this, we use the ``` execute_mechIDsvSim.sh ``` script in the ``` ./analysis ``` directory. The requirements are as follows:
+
+1. The project name
+2. sv
+
+For the HGSVC2 dataset, we would use the following : 
+
+```
+../analysis
+
+sbatch execute_mechIDsvSim.sh \
+HGSVC2 \
+sv
+```
+
+We are left with the following classes of SVs: high local homology (HLH), intermediate local homology (ILH), no local homology (NLH) and 'Undefined'. 
+
+Note: In this case, we are annotating the raw Blast coverage and identity scores, therefore, the bash script could be manipulated to use the pre-zscore generated files. 
+
 
 ## Step 5 : Identifying optimal clustering parameters, and training reusable models  
 
