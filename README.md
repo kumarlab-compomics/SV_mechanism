@@ -65,7 +65,7 @@ In the end you should have two large vcfs/csvs that represent the real and simul
 
 ## Step 2 : Annotating real and simulated SVs
 
-Next, we want to annotate the real and simulated vcf-like files. [See more details about how and which features are annotated, along with data requirements.]
+Next, we want to annotate the real and simulated vcf-like files. [See more details about how and which features are annotated, along with data requirements below.]
 
 Due to the scale and size of the whole-genome population-level studies, the vcf-like files are split by chromosome, then further batched into 10K SVs. For each chromosome, a set of bash scripts are deployed in parallel, which then starts bash and python scripts to annotate each batch. 
 
@@ -95,19 +95,47 @@ H1
 
 In ``` execute_Master1.sh ``` the following bash scripts are copied and customized to start the correct number of array jobs, as per the number of batches. Within these bash scripts, python scripts are then executed. 
 
-- ``` execute_seqFeaturesSVTemplate.sh ``` : To calculate sequence features of the SVs' sequences
-  - ``` adding_seqFeaturesSV.py ```
-- seqFeatures;
-- flankSeq ;
-- SVcoords ;
-- RepliSeq ;
-- searchRepeatMasker ;
 - ``` execute_ENCODETemplate.sh``` : To calculate SV and flanking epigenetic profiles
   - ``` adding_epiFeaturesSV.py ``` 
   - ``` adding_epiFeaturesflanks.py ``` 
+- ``` execute_RepliSeqTemplate.sh ``` : To annotate the replication timing of the SV's position
+  - ``` adding_RepliSeq.py ```
+- ``` execute_SVcoordsTemplate.sh ``` : This generates bed files to represent the up and downstream flanks to the SVs. We then annotate these beds based on their confidence to produce R-loops, Repeat Masker motifs and nonB DNA structures.
+  - ``` adding_SVcoords.py ```
+  - ``` adding_flankRLoop.py ```
+  - ``` adding_flankRepeatMasker.py ```
+  - ``` adding_flanknonBDNA.py ```
+- ``` execute_chromoBandTemplate.sh ``` : To annotate the giemsa stain at an SV's position
+- ``` execute_flankSeqTemplate.sh ``` : To extract reference genome sequences from the flanking coordinates. Next, we use these sequences to calculate sequence features, local homology (as per Blast alignments) and DNA shape
+  - ``` adding_flankSeq.py ```
+  - ``` adding_seqFeatures.py ```
+  - ``` adding_BlastDNAShape.py ```
+  - ``` adding_Blastmerges.py ```
+- ``` execute_searchRepeatMaskerTemplate.sh ``` : To run Repeat Masker on the deleted and inserted sequences
+  - ``` adding_searchRepeatMasker.py ```
+  - ``` adding_searchRepeatMaskermerges.py ```
+- ``` execute_seqFeaturesSVTemplate.sh ``` : To calculate sequence features of the SVs' sequences
+  - ``` adding_seqFeaturesSV.py ```
 
+Subject to successfully annotating each batch of SVs, we must then merge these annotations. We use the ``` execute_Master1Merge.sh ``` script, which requires the following arguments : 
+1. The project name
+2. sv or svSIM, depending on the file we are annotating
+3. The name of directory used to store epigenetic data 
 
-need to include merging after this... 
+As per our HGSVC2 example, here are the commands for this merging script for both the real and simulated SVs
+
+```
+sbatch execute_Master1Merge.sh \
+HGSVC2 \
+sv \
+H1
+
+sbatch execute_Master1Merge.sh \
+HGSVC2 \
+svSIM \
+H1
+```
+
 
 ### Data required for annotations
 
