@@ -73,7 +73,7 @@ big_train = big_train.reset_index(drop=True)
 
 '''
 The following two steps were done for dimension reduction (DR), specifically to eliminate redundant features
-DR1. We applied ANOVA stats tests across the four categories (NHEJ, SSAaEJ, HR, Undefined). We kept the features with a p-value was less than 0.05.
+DR1. We applied ANOVA stats tests across the four categories (NLH, ILH, HLH, Undefined). We kept the features with a p-value was less than 0.05.
 	Note: We did not apply post-hoc testing to identify WHICH pairwise test was significant. We are only interested in the features that could be helpful upon discrimination
 DR2. We calculated the absolute pairwise correlations across all the features (as per .corr() function). We identified feature pairs where corr>0.95. We then removed the 1/2 of the feature pairs
 
@@ -85,7 +85,7 @@ pval_grab = []
 cols_grab = []
 
 for i in list(big_train.filter(like='zscore').columns):
-	lol = stats.f_oneway(big_train[i][big_train['mechID_homo'] == 'NHEJ'],big_train[i][big_train['mechID_homo'] == 'SSAaEJ'],big_train[i][big_train['mechID_homo'] == 'HR'], big_train[i][big_train['mechID_homo'] == 'Undefined'], )
+	lol = stats.f_oneway(big_train[i][big_train['mechID_homo'] == 'NLH'],big_train[i][big_train['mechID_homo'] == 'ILH'],big_train[i][big_train['mechID_homo'] == 'HLH'], big_train[i][big_train['mechID_homo'] == 'Undefined'], )
 	pval_grab.append(lol[1])
 	cols_grab.append(i)
 
@@ -172,7 +172,7 @@ print(split1_train_att.groupby(['fuzzy', 'Forced']).size())
 '''
 The following steps were used to identify the optimal parameters (OP).
 OP1. Calculating Silhouette scores using all the points (OP1.1) and the high quality points (OP1.2)
-OP2. Identifying clusters with enrichment in a specific homology-based label. We then take NHEJ and HR enriched clusters and apply Fisher Exact tests to obtain the odds ratio (OR)
+OP2. Identifying clusters with enrichment in a specific homology-based label. We then take NLH and HLH enriched clusters and apply Fisher Exact tests to obtain the odds ratio (OR)
 	We consider the homology-label's proportion in the cluster. The greatest proportion is awarded the pseudo-assignment. We do this with high quality cluster assignments only. 
 OP3. Quantifying the representation for the homology-labels. In this case, we compare the proportion of homology-based labels that are considered "high quality". 
 	We set 50% as the minimum threshold. 
@@ -200,37 +200,37 @@ clusterids = []
 labels = []
 
 for j in range(0, soft_clusters.shape[1]):
-	a = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'HR')])
-	b = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'SSAaEJ')])
-	c = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'NHEJ')])
+	a = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'HLH')])
+	b = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'ILH')])
+	c = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'NLH')])
 	d = len(split1_train_att[(split1_train_att.Forced ==True) & (split1_train_att.fuzzy=='fuzzy'+str(j))& (split1_train_att.target == 'Undefined')])
 	clusterids.append([a,b,c,d])
 	labels.append('fuzzy'+str(j))
 table = np.array(clusterids)
 print(table)
 
-tabledf = pd.DataFrame(table.T, columns = labels, index = ['HR', 'SSAaEJ', 'NHEJ', 'Undefined'])
+tabledf = pd.DataFrame(table.T, columns = labels, index = ['HLH', 'ILH', 'NLH', 'Undefined'])
 tabledf_prop = (tabledf.T/tabledf.sum(axis=1)).T
 print(tabledf_prop)
 
 nhejlike = []
 hrlike = []
 
-# Looping through the soft-clusters and identifying enrichments in NHEJ/HR
+# Looping through the soft-clusters and identifying enrichments in NLH/HLH
 for j in range(0, soft_clusters.shape[1]):
-	if tabledf_prop.idxmax(axis=0)['fuzzy'+str(j)] == 'NHEJ':
+	if tabledf_prop.idxmax(axis=0)['fuzzy'+str(j)] == 'NLH':
 		print('pseudo identity of fuzzy'+str(j))
 		nhejlike.append('fuzzy'+str(j))
-	if tabledf_prop.idxmax(axis=0)['fuzzy'+str(j)] == 'HR':
+	if tabledf_prop.idxmax(axis=0)['fuzzy'+str(j)] == 'HLH':
 		hrlike.append('fuzzy'+str(j))
 
-tabledf['nhej_like'] = tabledf[nhejlike].sum(axis=1)
-tabledf['hr_like'] = tabledf[hrlike].sum(axis=1)
+tabledf['NLH_like'] = tabledf[nhejlike].sum(axis=1)
+tabledf['HLH_like'] = tabledf[hrlike].sum(axis=1)
 
-a = tabledf.loc['NHEJ', 'nhej_like']
-b = tabledf.loc['HR', 'nhej_like']
-c = tabledf.loc['NHEJ', 'hr_like']
-d = tabledf.loc['HR', 'hr_like']
+a = tabledf.loc['NLH', 'NLH_like']
+b = tabledf.loc['HLH', 'NLH_like']
+c = tabledf.loc['NLH', 'HLH_like']
+d = tabledf.loc['HLH', 'HLH_like']
 
 # Printing out the Fisher Exact test results
 print([[a,b],[c,d]])
