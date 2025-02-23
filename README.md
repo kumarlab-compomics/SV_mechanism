@@ -106,8 +106,6 @@ In ``` execute_Master1.sh ``` the following bash scripts are copied and customiz
   - ``` adding_flankRLoop.py ```
   - ``` adding_flankRepeatMasker.py ```
   - ``` adding_flanknonBDNA.py ```
-- ``` execute_chromoBandTemplate.sh ``` : To annotate the giemsa stain at an SV's position
-  - ``` adding_chromoBand.py ```
 - ``` execute_flankSeqTemplate.sh ``` : To extract reference genome sequences from the flanking coordinates. Next, we use these sequences to calculate sequence features, local homology (as per Blast alignments) and DNA shape
   - ``` adding_flankSeq.py ```
   - ``` adding_seqFeatures.py ```
