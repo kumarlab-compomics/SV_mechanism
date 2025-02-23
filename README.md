@@ -218,6 +218,46 @@ Note: In this case, we are annotating the raw Blast coverage and identity scores
 
 ## Step 5 : Identifying optimal clustering parameters, and training reusable models  
 
+As per our analysis of our features, many features CAN describe the homology-based labels. However, we wanted to develop a method which can exploit homology, along with learn more about the underlying features, likely supporting DSB repair. As such, we opted to use an active unsupervised approach to generate clusters to describe SVs. 
 
+Importantly, we started with identifying the optimal clustering parameters to use. We created models separately for insertions and deletions, and used training HGSVC2 SVs given they are considered the highest quality. Note, SVs from some chromosomes are held out during training. 
 
+The models we optimized against include: 
 
+- The n number of dimensions upon PCA dimension reduction (2 5 10 20)
+- The minimum cluster size (300 500 700 900 1100 1300). Note, we used HDBSCAN for clustering. This was chosen to preserve the gradient-like nature we observed between NLH>ILH>HLH, account for sample size variability/ density, and remove the burden of selecting the number of clusters.
+- The distance metric (braycurtis manhattan canberra euclidean chebyshev)
+
+Across all the combinations of parameters, we identify high quality cluster assignments, along with identify cluster enrichment based on HLH vs NLH. (Note: This is why we consider this model "active unsupervised", since we use the prior knowledge that homology is relevant and should be enriched, however the cluster algorithm is not privy to explicit homology thresholds. Instead, the ideal model recognizes the enrichment, along with learning other underlying features, such as epigenetics or DNA shape). 
+
+Therefore, to run this, use: 
+
+```
+sbatch execute_PCAhdbscanins.sh
+```
+
+Upon the completion of this script, the results which describe the parameter combinations are printed in .txt files, which should be manually read in order to identify the optimal parameters. 
+
+From the above, we identified the following as the ideal parameters: 
+
+- Insertions: PCA using 5 components, a minimum of 1300 SVs required for a cluster, Bray-Curtis distance metric
+- Deletions: PCA using 5 components, a minimum of 700 SVs required for a cluster, Bray-Curtis distance metric
+
+We therefore, wanted to train models which could be freely applied across any dataset. This required applying the above parameters to scaling, PCA, KNN models trained using the HGSVC2 training chromosomes, which are saved for future use. Therefore, to run this, use: 
+
+```
+sbatch execute_PCAhdbscanOptimal.sh
+```
+
+Finally, we wanted to apply these models across multiple datasets. This includes, applying it to the entire HGSVC2 dataset, along with independent datasets such as 1KG, 1KG-ONT, or SVs from 100KG. The requirements are as follows:
+
+1. The project name
+2. sv
+
+For the HGSVC2 dataset, we would use the following : 
+
+```
+sbatch execute_PCAhdbscanApplication.sh \
+HGSVC2 \
+sv
+```
