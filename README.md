@@ -159,27 +159,24 @@ For these experiments refer to the following locations to download the appropria
 
 #### ``` execute_RepliSeqTemplate.sh ```
 
-[ re-do description + instructions ] 
-
-Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome _. This file was further processed using Repliseq to describe genomic locations by their S50. 
-
-We have provided the H1 processed Repli-Seq file here : ``` ./data/RepliSeq/H1/ ```
-
+Results from a 16-stage Repli-Seq experiment was downloaded from 4D nucleome, derived from H1-hESCs. This file was further processed using Repliseq to describe genomic locations by their S50. We have provided the H1 processed Repli-Seq file here : ``` ./data/RepliSeq/H1/ ```
 
 #### ``` execute_SVcoordsTemplate.sh ```
 
-[ re-do description + instructions ] 
+In this script, we generate bed files to represent the flanking regions of the SVs. 
 
- - To annotate non-B DNA structures in flanking regions, files from https://nonb-abcc.ncifcrf.gov/apps/ftp/browse were further processed by collapsing regions into bed files.
- - In a similar fashion, the file https://www.repeatmasker.org/species/hg.html was processed into bed files to characterize known sites of LINE, Low complexity, LTRs, Satellites, simple repeats and SINEs. 
+- For preflank; start @ breakpoint - 2000bp, stop @ breakpoint
+- For postflank; start @ breakpoint, (for insertions) stop @ breakpoint + 2000, (for deletions) stop @ breakpoint + SV length + 2000
 
-#### ``` execute_chromoBandTemplate.sh ```
+Using these coordinates we do bedtools intersections with the following files: 
 
+- For non-BDNA structures: downloaded from here https://nonb-abcc.ncifcrf.gov/apps/ftp/browse. For sites with overlapping motifs, regions are collapsed
+- For RepeatMasker motifs: downloaded from here https://www.repeatmasker.org/species/hg.html. Similarly collapsed
+- For Rloops: downloaded from here: https://rloopbase.nju.edu.cn/download.jsp. 
 
 #### ``` execute_flankSeqTemplate.sh ```
 
-- basically all you need is the reference genome, which you already have
-
+The first step in this script is obtaining flanking sequences from the reference. The hg38 fasta must be accessible.
 
 ## Step 3 : Calculating z-scores across features
 
