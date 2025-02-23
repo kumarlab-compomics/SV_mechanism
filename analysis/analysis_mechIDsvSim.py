@@ -33,15 +33,14 @@ result = result.drop(['ID','chr', 'POS', 'type'] , axis=1)
 forced = result
 
 # We use the prepost_Blastcoverage and prepost_pident columns from the Blast annotations (processing to calculate the coverage)
-# Based on the thresholds, we label SVs with either a : HR, NHEJ, SSAaEJ or Undefined label. These labels are akin to the HLH, NLH, ILH and Undefined labels in the manuscript
-
+# Based on the thresholds, we label SVs with either a : HLH, ILH, NLH, or Undefined label. 
 for idx, row in forced.iterrows():
 	if (row.prepost_Blastcoverage>0.25) & (row.prepost_pident>90):
-		forced.loc[idx, 'mechID_homo'] = 'HR'
+		forced.loc[idx, 'mechID_homo'] = 'HLH'
 	elif (row.prepost_Blastcoverage==0):
-		forced.loc[idx, 'mechID_homo'] = 'NHEJ'
+		forced.loc[idx, 'mechID_homo'] = 'NLH'
 	elif ((row.prepost_Blastcoverage>0.0025) & (row.prepost_Blastcoverage<0.2)) & (row.prepost_pident>80) :
-		forced.loc[idx, 'mechID_homo'] = 'SSAaEJ'
+		forced.loc[idx, 'mechID_homo'] = 'ILH'
 	else:
 		forced.loc[idx, 'mechID_homo'] = 'Undefined'
 
