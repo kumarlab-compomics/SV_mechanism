@@ -56,7 +56,7 @@ rm /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/SVlen/${files}/${file
 
 # For the following annotations (chromoBand seqFeaturesSV flankSeq SVcoords RepliSeq searchRepeatMasker ENCODE):
 # We make a copy of the "template" script and use the number of splits to push job arrays for this annotation time
-for script in chromoBand seqFeaturesSV flankSeq SVcoords RepliSeq searchRepeatMasker ;
+for script in seqFeaturesSV flankSeq SVcoords RepliSeq searchRepeatMasker ;
 	do
 	mkdir /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/${script}
 	cp execute_${script}Template.sh /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/${script}/execute_${script}_${files}.sh
