@@ -20,7 +20,7 @@ module load scipy-stack
   # Insertions: PCA using 5 components, a minimum of 1300 SVs required for a cluster, Bray-Curtis distance metric
   # Deletions: PCA using 5 components, a minimum of 700 SVs required for a cluster, Bray-Curtis distance metric
 
-python analysis_hdbscanIDOptimalHOMO_240708.py \
+python analysis_hdbscanIDOptimalHOMO.py \
 /home/nboev/projects/def-sushant/nboev/analysis/HGSVC2_v2_integrated_callset/sv/IDmechsvSIM/20240625/ \
 insertion_ID0625.tsv \
 240625/ \
@@ -33,7 +33,7 @@ insertion \
 >> ./sv/analysis_hdbscanIDOptimalHOMO_240708.py.txt
 
 
-python analysis_hdbscanIDOptimalHOMO_240708.py \
+python analysis_hdbscanIDOptimalHOMO.py \
 /home/nboev/projects/def-sushant/nboev/analysis/HGSVC2_v2_integrated_callset/sv/IDmechsvSIM/20240625/ \
 deletion_ID0625.tsv \
 240625/ \
