@@ -58,7 +58,6 @@ ${files} DEL \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/mirror_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/short_tandem_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/z-dna_motifs.${locnoext}.flanks.csv \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/chromoBand/${files}/${locnoext}.SVlength.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.2000.EpiFeat.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/DNAshape/${files}/postmerge/${locnoext}.DNAshape.csv \
@@ -85,7 +84,6 @@ ${files} INS \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/mirror_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/short_tandem_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/z-dna_motifs.${locnoext}.flanks.csv \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/chromoBand/${files}/${locnoext}.SVlength.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.2000.EpiFeat.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/DNAshape/${files}/postmerge/${locnoext}.DNAshape.csv \
