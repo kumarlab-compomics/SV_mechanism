@@ -261,3 +261,38 @@ sbatch execute_PCAhdbscanApplication.sh \
 HGSVC2 \
 sv
 ```
+
+## Step 6 : Downstream analysis of homology-based and clustering-based labelled SVs
+
+Now that SVs have been labelled with both the homology-based workflow, along with the clustering-based procedure, the goal is now to identify patterns and make conclusions. In this github, I will describe two of such analysis conducted: the enrichment patterns of SVs falling in genomic elements as per the homology-based label (6.1), the relationship between cluster-based labels and recombination rates (6.2)
+  Note: 6.2. requires the variants from the 1KG dataset.
+
+### Step 6.1 : The enrichment patterns of SVs falling in genomic elements as per the homology-based label
+
+The goal here was to understand if there are enrichment patterns between SVs generally perturbing genomic elements, along with homology-based labels display differing magnitudes/ direction in enrichment. If extrapolated to repair, this may implicate the strategy of repair preserving (or failing to preserve) a specific genomic element. Note: The enrichment we calculate is based on a comparison between the real SVs and their 100 matching simulations. We therefore must generate bed files to represent the observed and simulated SVs. 
+
+In both cases the required inputs are : 
+
+1. The project name
+2. sv
+
+```
+cd ../downstream
+
+sbatch execute_genbedWork.sh \
+HGSVC2 \
+sv
+
+sbatch execute_genbedSims100Work.sh \
+HGSVC2 \
+sv
+```
+
+### Step 6.2 : The relationship between cluster-based labels and recombination rates
+
+As described above, this section requires SVs from the 1KG dataset to be simulated, annotated then labelled. We chose this dataset since it holds the most ancestral diversity and 1000s of individuals. This allowed us to explore examples of recent population divergences more effectively. These vcfs can be found here: http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/ 
+  Note: This data should be saved under the "project name", 1KG.
+
+
+
+
