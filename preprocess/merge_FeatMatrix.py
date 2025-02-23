@@ -278,26 +278,11 @@ nonbZ = nonbZ[['ID', 'ZDNA_sum']]
 print(nonbZ.head())
 print('number of lines from nonb', len(nonbZ.ID.unique()))
 
-# Annotation : Chromoband state of breakpoints (adding_chromoBand.py)
-# This is annotated as dummy variables
-chromoband = pd.read_csv(str(argv[21]), comment='#', sep='\t')
-chromoband = chromoband[(chromoband.CHROM == chr) & (chromoband.SV_Type == type)]
-for idx, row in chromoband.iterrows():
-	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
-		chromoband.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
-	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
-		chromoband.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
-chromoband = chromoband[['ID', 'gieStain']]
-chromoband_dum = pd.get_dummies(chromoband, columns = ['gieStain'])
-chromoband_dum = chromoband_dum.reset_index(drop=True)
-print(chromoband_dum.head())
-print('number of lines from chromoband_dum', len(chromoband_dum.ID.unique()))
-
 # Annotation : Local homology between the SV-preflank, SV-postflank, preflank-postflank (adding_Blastmerges.py)
 # In this case, we are calculating "coverage" values based on the expected lengths
 	# For SV-preflank, SV-postflank : The denominator is the length of the SV
 	# For preflank-postflank : The denominator is 2000bp (ie. the length of one side of the flank)
-blast = pd.read_csv(str(argv[22]), comment='#', sep='\t')
+blast = pd.read_csv(str(argv[21]), comment='#', sep='\t')
 blast = blast[(blast.CHROM == chr) & (blast.SV_Type == type)]
 blast[['chr', 'pos', 'len', 'type']] = blast['ID'].str.split('_',  expand=True)
 blast[["pos", "len"]] = blast[["pos", "len"]].apply(pd.to_numeric)
@@ -320,7 +305,7 @@ print(blast.head())
 print('number of lines from blasting', len(blast.ID.unique()))
 
 # Annotation : Epigenetics from the flank (adding_epiFeaturesflanks.py)
-epifeat = pd.read_csv(str(argv[23]), comment='#', sep='\t')
+epifeat = pd.read_csv(str(argv[22]), comment='#', sep='\t')
 epifeat = epifeat[(epifeat.CHROM == chr) & (epifeat.SV_Type == type)]
 for idx, row in epifeat.iterrows():
 	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
@@ -336,7 +321,7 @@ print(epifeat.head())
 print('number of lines from epifeat', len(epifeat.ID.unique()))
 
 # Annotation : DNA shape features of the SV, preflank and postflank (adding_BlastDNAShape.py)
-shape = pd.read_csv(str(argv[24]), sep='\t')
+shape = pd.read_csv(str(argv[23]), sep='\t')
 shape[['chr', 'pos', 'len', 'type']] = shape['ID'].str.split('_',  expand=True)
 shape[["pos", "len"]] = shape[["pos", "len"]].apply(pd.to_numeric)
 shape = shape[(shape.chr == chr) & (shape.type == type)]
@@ -354,7 +339,7 @@ print(shape.head())
 print('number of lines from shape', len(shape.ID.unique()))
 
 # Annotation : Replication timing of the SV position/ breakpoint (adding_RepliSeq.py)
-repli = pd.read_csv(str(argv[25]), sep='\t')
+repli = pd.read_csv(str(argv[24]), sep='\t')
 repli = repli[(repli.CHROM == chr) & (repli.SV_Type == type)]
 for idx, row in repli.iterrows():
 	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
@@ -366,7 +351,7 @@ print(repli.head())
 print('number of lines from repli', len(repli.ID.unique()))
 
 # Annotation : Max Rloop level within the flanks (adding_flankRLoop.py)
-rloop = pd.read_csv(str(argv[26]), sep='\t')
+rloop = pd.read_csv(str(argv[25]), sep='\t')
 rloop = rloop.rename(columns={'unique_id': 'ID'})
 rloop[['chr', 'pos', 'len', 'type']] = rloop['ID'].str.split('_',  expand=True)
 rloop[["pos", "len"]] = rloop[["pos", "len"]].apply(pd.to_numeric)
@@ -405,7 +390,7 @@ if (type == 'insertion') | (type=='INS'):
 
 # Annotation : Epigenetics from the SV (adding_epiFeaturesSV.py)
 elif (type == 'deletion') | (type=='DEL'):
-	epi = pd.read_csv(str(argv[27]), comment='#', sep='\t')
+	epi = pd.read_csv(str(argv[26]), comment='#', sep='\t')
 	epi = epi[(epi.CHROM == chr) & (epi.SV_Type == type)]
 	for idx, row in epi.iterrows():
 		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
