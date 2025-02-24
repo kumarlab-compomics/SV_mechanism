@@ -264,7 +264,7 @@ sv
 
 ## Step 6 : Downstream analysis of homology-based and clustering-based labelled SVs
 
-Now that SVs have been labelled with both the homology-based workflow, along with the clustering-based procedure, the goal is now to identify patterns and make conclusions. In this github, I will describe two of such analysis conducted: the enrichment patterns of SVs falling in genomic elements as per the homology-based label (6.1), the relationship between cluster-based labels and recombination rates (6.2)
+Now that SVs have been labelled with both the homology-based workflow, along with the clustering-based procedure, the goal is now to identify patterns and make conclusions. In this github, I will describe three of such analysis conducted: the enrichment patterns of SVs falling in genomic elements as per the homology-based label (6.1), evidence of the underlying patterns of repair as per the standardized features using effect sizes (ie. Cohen's d; 6.2), and the relationship between cluster-based labels and recombination rates (6.3)
   Note: 6.2. requires the variants from the 1KG dataset.
 
 ### Step 6.1 : The enrichment patterns of SVs falling in genomic elements as per the homology-based label
@@ -288,7 +288,17 @@ HGSVC2 \
 sv
 ```
 
-### Step 6.2 : The relationship between cluster-based labels and recombination rates
+### Step 6.2 : evidence of the underlying patterns of repair as per the standardized features using effect sizes (ie. Cohen's d)
+
+This analysis was conducted locally in a Jupyter notebook, here ```./downstream/xx ```
+
+The goal was to quantify how discriminatory the homology-based and clustering-based labels were when comparing a the HLH vs NLH or cluster I vs cluster II SVs. This was used to show that underlying features, such as epigenetics or DNA shape features could improve (or maintain or reduce) the discrimination between these SVs. 
+
+The method we used to quantify this discrimination is by using effect sizes, specifically Cohen's d. Essentially, Cohen's d, measures the standardized mean difference between two groups. As described by: Cohen's d = (x̄<sub>1</sub> - x̄<sub>2</sub>) / (s<sub>pooled</sub>)
+
+Within our context, for example, we could calculate the effect size between the standardized mean of the local upstream MGW between HLH versus NLH SVs. When interpreting these effect sizes, it is common to use 0.5 and 0.8 as a threshold for medium and large effect sizes. 
+
+### Step 6.3 : The relationship between cluster-based labels and recombination rates
 
 As described above, this section requires SVs from the 1KG dataset to be simulated, annotated then labelled. We chose this dataset since it holds the most ancestral diversity and 1000s of individuals. This allowed us to explore examples of recent population divergences more effectively. These vcfs can be found here: http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/ 
   Note: This data should be saved under the "project name", 1KG.
