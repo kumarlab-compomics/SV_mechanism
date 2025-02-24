@@ -290,7 +290,7 @@ sv
 
 ### Step 6.2 : evidence of the underlying patterns of repair as per the standardized features using effect sizes (ie. Cohen's d)
 
-This analysis was conducted locally in a Jupyter notebook, here ```./downstream/xx ```
+This analysis was conducted locally in a Jupyter notebook, here ```./downstream/CohensDCalcViz.ipynb ```
 
 The goal was to quantify how discriminatory the homology-based and clustering-based labels were when comparing a the HLH vs NLH or cluster I vs cluster II SVs. This was used to show that underlying features, such as epigenetics or DNA shape features could improve (or maintain or reduce) the discrimination between these SVs. 
 
