@@ -403,4 +403,8 @@ As described above, this section requires SVs from the 1KG dataset to be simulat
 
 ** NEED TO WORK ON THIS!!!
 
+for the execute_vizRareCommon_241114.sh input
+#$1 = '/home/nboev/projects/def-sushant/nboev/preprocess/20220422_3202_phased_SNV_INDEL_SV_bychrom/SVTrue_typedeletion_resTrue/SVlen/SVTrue_typedeletion_resTrue.csv'
+#$2 = /home/nboev/projects/def-sushant/nboev/data/phased_SNV_INDEL_SV_20220422_3202/igsr_samples.tsv'
+
 
