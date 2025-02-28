@@ -397,14 +397,34 @@ Within our context, for example, we could calculate the effect size between the 
 
 ### Step 6.3 : The relationship between cluster-based labels and recombination rates
 
-As described above, this section requires SVs from the 1KG dataset to be simulated, annotated then labelled. We chose this dataset since it holds the most ancestral diversity and 1000s of individuals. This allowed us to explore examples of recent population divergences more effectively. These vcfs can be found here: http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/ 
-  Note: This data should be saved under the "project name", 1KG.
+As described above, this section requires SVs from the 1KG dataset to be simulated, annotated then labelled (ie. Steps 0 to 5). We chose this dataset since it holds the most ancestral diversity and 1000s of individuals. This allowed us to explore examples of recent population divergences more effectively. 
 
+To do this, download vcfs here ``` ./data/1KG ``` The following link provides the chromosome-specific vcfs. 
 
-** NEED TO WORK ON THIS!!!
+These vcfs can be found here: http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/ 
 
-for the execute_vizRareCommon_241114.sh input
-#$1 = '/home/nboev/projects/def-sushant/nboev/preprocess/20220422_3202_phased_SNV_INDEL_SV_bychrom/SVTrue_typedeletion_resTrue/SVlen/SVTrue_typedeletion_resTrue.csv'
-#$2 = /home/nboev/projects/def-sushant/nboev/data/phased_SNV_INDEL_SV_20220422_3202/igsr_samples.tsv'
+In addition to this file, we will require the metadata sheet for the individuals in the 1KG dataset. This can be downloaded here : https://www.internationalgenome.org/data-portal/sample
+
+Further, population-specific recombination rates will be required. These are obtained by Spence, et al. (2019). These can be downloaded in this manner: 
+
+```
+cd ../data
+mkdir popRecombRate
+cd popRecombRate
+wget https://zenodo.org/records/11437540/files/hg38_maps.tar.gz
+```
+
+We wanted to understand more about recombination rates, relative to cluster I or II SVs. To do this, we created bed files for each individual and cluster type. These bed files held rare SVs (AF<1%), and intersected with population-specific recombination rates. The final output produces a summary of the individual's mean recombination rate for cluster I and II. To run this analysis use the following: 
+
+1. The location of the vcf-like file which contains all the SVs along with their genotype (should be in the format required in Step 0). 
+2. The location of the igsr sample file
+
+For the 1KG dataset, the following command can be used: 
+
+```
+sbatch execute_Rare1KGRecombRate.sh \
+../preprocess/1KG/sv/SVlen/SVTrue_typedeletion_resTrue.csv \
+../data/1KG/igsr_samples.tsv
+```
 
 
