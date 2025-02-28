@@ -23,7 +23,7 @@ module load bedtools
 mkdir /home/nboev/projects/def-sushant/nboev/analysis/$1/$2/IDmechsvSIM/20240625/splitsChromo/bedWork100s
 
 # We loop through SV types, homology-based label, and each chromosome to push the generating_bedSim100sWork.py script. 
-# We then concatenate these together and save the larger file
+# We then concatenate these together and save the larger file (ie. regardless of chromosome).
 for k in insertion deletion ;
 	do
 	for j in HLH ILH NLH ;
