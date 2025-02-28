@@ -375,7 +375,15 @@ These files were then processed, whereby the 9th columns either contained "frequ
 
 #### Segmental Duplications
 
-** STILL NEED TO DO.. 
+Downloaded and processed the gene annotation bed file from UCSC
+
+```
+mkdir SegDup
+cd SegDup
+wget https://hgdownload.cse.ucsc.edu/goldenpath/hg38/database/genomicSuperDups.txt.gz
+```
+
+This file was then filtered for regions where the alignment quality is above 0.95. 
 
 ### Step 6.2 : evidence of the underlying patterns of repair as per the standardized features using effect sizes (ie. Cohen's d)
 
