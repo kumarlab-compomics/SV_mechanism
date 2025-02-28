@@ -288,6 +288,95 @@ HGSVC2 \
 sv
 ```
 
+From these two, we therefore have: beds to represent real SVs, beds to represent simulated SVs among the 100 iterations. 
+
+Next, we are interested in how these beds perturb (ie. intersect) with genomic elements. For this, we provide a bed file file which holds the known positions of important elements. Using the intersected bed files (for both real and simulated SVs), we calculate an enrichment score. To run this, the requirements are as follows: 
+
+1. The location of the bed file which holds the genomic element of interest
+2. The shorthand name of the genomic element
+3. The project name
+4. sv
+
+Using the HGSVC2 dataset and an example genomic element (ie. distal enhancer-like signatures (dELS) provided by SCREEN, see information below), we would use the following: 
+
+```
+sbatch execute_bedWorkIntersection.sh \
+../data/SCREEN/GRCh38-cCREs_dELS.bed \
+ALLdELS \
+HGSVC2 \
+sv
+```
+Later, you can use the .csv generated from the analysis_ES.py (called within execute_bedWorkIntersection.sh) to calculate a mean enrichment score (ES) across all the iterations then calculate empirical p-values.
+
+### Data optional to enrichment analysis
+
+The bedfiles should be kept within the ```./data ``` directory. Below, I will list the annotations and processing steps used for our ES figure. 
+
+####  Coding regions
+
+Downloaded and processed the gene annotation bed file from RefSeq
+
+```
+cd ../data
+mkdir CDS
+cd CDS
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/genes/hg38.ncbiRefSeq.gtf.gz
+```
+
+I then conditionally filtered this file, whereby the 3rd column must be equal to "CDS"
+
+#### Candidate cis-Regulatory Elements (cCREs)
+
+Downloaded and processed the SCREEN cCRE file using this:
+
+```
+mkdir SCREEN
+cd SCREEN
+wget https://downloads.wenglab.org/V3/GRCh38-cCREs.bed
+grep "dELS" GRCh38-cCREs.bed > GRCh38-cCREs_dELS.bed
+grep "pELS" GRCh38-cCREs.bed > GRCh38-cCREs_pELS.bed
+```
+
+These files separately map to distal and proximal ELS.
+
+#### Topologically Associated Domains (TADs)
+
+Downloaded a H1-hESC generated TAD file provided by Dixon, et al. (2015)
+
+```
+mkdir TAD
+cd TAD
+wget http://3dgenome.fsm.northwestern.edu/downloads/hg38.TADs.zip
+```
+
+#### Lamina Associated Domains (LADs)
+
+This file was provided by Shah, et al., (2023). 
+
+```
+mkdir LAD
+cd LAD
+wget https://static-content.springer.com/esm/art%3A10.1186%2Fs13059-023-02849-5/MediaObjects/13059_2023_2849_MOESM5_ESM.xlsx
+```
+
+The excel sheet, ESCs, was then filtered to create two separate bed files, one where the 4th column contains "T1" or "T2", to represent the T1-LADs and T2-LADs, respectively. 
+
+#### Fragile Sites
+
+This file was provided by Kumar, et al., (2019). 
+
+```
+mkdir FragileSites
+cd FragileSites
+wget https://webs.iiitd.edu.in/raghava/humcfs/humcfs_fragile.gff3.zip
+```
+
+These files were then processed, whereby the 9th columns either contained "frequency=rare" or "frequency=common"
+
+#### Segmental Duplications
+
+** STILL NEED TO DO.. 
+
 ### Step 6.2 : evidence of the underlying patterns of repair as per the standardized features using effect sizes (ie. Cohen's d)
 
 This analysis was conducted locally in a Jupyter notebook, here ```./downstream/CohensDCalcViz.ipynb ```
@@ -304,5 +393,6 @@ As described above, this section requires SVs from the 1KG dataset to be simulat
   Note: This data should be saved under the "project name", 1KG.
 
 
+** NEED TO WORK ON THIS!!!
 
 
