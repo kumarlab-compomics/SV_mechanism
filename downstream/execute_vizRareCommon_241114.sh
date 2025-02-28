@@ -21,10 +21,6 @@ module load bedtools
 # Making a directory to hold outputs
 mkdir /home/nboev/projects/def-sushant/nboev/analysis/20220422_3202_phased_SNV_INDEL_SV_bychrom/SVTrue_typedeletion_resTrue/IDmechsvSIM/20240625/splitsChromo/bedRareInd/popRates
 
-# will need to delete these two!!!
-#$1 = '/home/nboev/projects/def-sushant/nboev/preprocess/20220422_3202_phased_SNV_INDEL_SV_bychrom/SVTrue_typedeletion_resTrue/SVlen/SVTrue_typedeletion_resTrue.csv'
-#$2 = /home/nboev/projects/def-sushant/nboev/data/phased_SNV_INDEL_SV_20220422_3202/igsr_samples.tsv'
-
 # Pushing the python script, generating_bedRaresInds.py. This script generates individual-level SVs for both clusters (clusterI and clusterII), among rare SVs. 
 python generating_bedRaresInds.py \
 $1 \
@@ -55,6 +51,6 @@ for i in ACB ASW BEB CDX CEU CHB CHS CLM ESN FIN GBR GIH GWD IBS ITU JPT KHV LWK
 		done
 	done
 
-# ** work on this part!!
+# We now have the individual-level recombination rate annotated bed files for rare SVs. We can now use the analysis_RarepopRecomb.py script to calculate the mean rate for cluster I and II SVs for each individual. 
 python analysis_RarepopRecomb.py \
 >> ./SVTrue_typedeletion_resTrue/analysis_RarepopRecomb_241127.py.txt
