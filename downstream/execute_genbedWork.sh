@@ -15,8 +15,8 @@ module load samtools
 module load bedtools
 
 # The input: 
-# 1: Project name and location
-# 2: The type of SVs to annotate (ie. sv or svSim). This is a subdirectory that holds the vcf/csv file
+# 1: Project name/ location
+# 2: sv
 # Note: We need to point to csvs which hold the homology based results. We are generating bed files to represent these strata by SV type
 
 # Creating a directory to store the bed files
