@@ -1,4 +1,4 @@
-# TITLE OF PAPER
+# DNA shape and epigenomics distinguish the mechanistic origin of genomic structural variations
 
 The objective is to describe structural (SVs) by features, including but not limited to local homology. 
 
