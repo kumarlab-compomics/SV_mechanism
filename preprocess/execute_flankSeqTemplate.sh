@@ -48,9 +48,8 @@ CHROM \
 >> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/adding_seqFeatures_240118.py.txt
 
 # We push this script which takes the 2000bp flanking sequences to :
-# 1. Perform various blast alignments to describe local homology
-# 2. Employ DNAShapeR to determine local and SV DNA shape features
-python adding_BlastDNAShape.py \
+# Employ DNAShapeR to determine local and SV DNA shape features
+python adding_DNAShape.py \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/flankSeq/CHROM/${filenamenoext}.with2000.flankseq_samtools.csv \
 $1 $2 \
 ${filenamenoext} \
@@ -58,21 +57,20 @@ CHROM \
 2000 \
 >> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/adding_BlastDNAShape_240522.py.txt
 
+# We use the same flanking files to perform the blast alignments, using an updated junction strategy
+python adding_Blast.py \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/flankSeq/CHROM/${filenamenoext}.with2000.flankseq_samtools.csv \
+$1 $2 \
+${filenamenoext} \
+CHROM \
+2000 \
+>> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/adding_Blast_250610.py.txt
+
 # We pusht his script to merge the homology results from Blast to the original vcf/csv file
 python adding_Blastmerges.py \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/flankSeq/CHROM/${filenamenoext}.with2000.flankseq_samtools.csv \
 $1 $2 \
 ${filenamenoext} \
 CHROM \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}pre_post_resultsungap.txt \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}pre_sv_resultsungap.txt \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}post_sv_resultsungap.txt \
->> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/adding_Blastmerges_240522.py.txt
-
-# cleaning up the merged files
-rm /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}pre_post_resultsungap.txt
-rm /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}pre_sv_resultsungap.txt
-rm /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}post_sv_resultsungap.txt
-rm /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}SV_testing.csv
-
-
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/CHROM/premerge/${filenamenoext}iter1_resultsungap.txt \
+>>/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/adding_Blastmerges_250610.py.txt
