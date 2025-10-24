@@ -36,81 +36,68 @@ Procedure:
 2. We check if a file is empty (more relevant for small files where no alignment results are produced, more common in somatic cases)
 3. If the file is not empty, we load and standardize column names
 4. We then drop all duplicated column using the standardized ID, whereby the top entry is the best entry, as per Blast
+5. We check the orientation of the alignments (they need to be in opposite dirs), and we check if the breakpoint junctions have been included (ie. +-2bp)
 '''
 
 def loadin (file, cond):
-	cols = ["qseqid" ,"sseqid", "pident", "length", "mismatch", "gapopen" ,"qstart", "qend", "sstart", "send", "evalue", "bitscore"]
-	if os.stat(file).st_size == 0:
-		print(file)
-		df_filt = pd.DataFrame(columns=cols)
-		df_filt['ID'] = 0
+		cols = ["qseqid" ,"sseqid", "pident", "length", "mismatch", "gapopen" ,"qstart", "qend", "sstart", "send", "evalue", "bitscore"]
+		if os.stat(file).st_size == 0:
+				df_filt = pd.DataFrame(columns=cols)
+				df_filt['ID'] = 0
 
-	else:
-		df = pd.read_csv(str(file), sep='\t', header=None)
-		trues = []
-		for i in cols:
-			trues.append(cond+i)
+		else:
+				df = pd.read_csv(str(file), sep='\t', header=None)
+				trues = []
+				for i in cols:
+					trues.append(cond+i)
 
-		df.columns = trues
-		df[['kind','ID_tmp']] = df[trues[0]].str.split('_chr',expand=True)
-		df_filt = df.drop_duplicates(subset=['ID_tmp'], keep='first')
+				df.columns = trues
+				df[['kind','ID_tmp']] = df[trues[0]].str.split('_chr',expand=True)
 
-		for idx, row in df_filt.iterrows():
-			df_filt.loc[idx, 'ID'] = 'chr'+str(row.ID_tmp)
+				if cond == 'iter1_':
+						preval = [1973, 1974, 1975, 1976, 1977]
+						postval = [23, 24,25, 26, 27]
 
-		df_filt = df_filt.drop(['kind', 'ID_tmp'], axis=1)
-	return df_filt
+				df[cond + 'orient'] = (((df[cond + 'qend'] - df[cond + 'qstart']) * (df[cond + 'send'] - df[cond + 'sstart'])) > 0)
+				df[cond+'prebrkpt_loose'] = df.apply(lambda row: any(row[cond+'sstart'] <= val <= row[cond+'send'] for val in preval),axis=1)
+				df[cond+'postbrkpt_loose'] = df.apply(lambda row: any(row[cond+'qstart'] <= val <= row[cond+'qend'] for val in postval),axis=1)
+				df_filt_loose = df[(df[cond+'orient']==True)&(df[cond+'prebrkpt_loose']==True)&(df[cond+'postbrkpt_loose']==True)].drop_duplicates(subset=['ID_tmp'], keep='first')
 
-# Calling the loadin function, via the Upstream-Downstream, Upstream-SV, and Downstream-SV Blast results
-prepost = loadin(str(argv[6]), 'prepost_')
-presv = loadin(str(argv[7]), 'presv_')
-postsv = loadin(str(argv[8]), 'postsv_')
+				for idx, row in df_filt_loose.iterrows():
+					df_filt_loose.loc[idx, 'ID'] = 'chr'+str(row.ID_tmp)
+				df_filt_loose = df_filt_loose.drop(['kind', 'ID_tmp'], axis=1)
+
+	return df_filt_loose
+
+# Calling the loadin function, via the Blast results
+iter1 = loadin(str(argv[6]), 'iter1_')
 
 '''
 The function, merging, helps do a series of merge iterations
 The input: 
 	blastdf: Dataframe to merge with the original vcf/csv file
-	cond: The blast condition (ie. prepost_, presv_, postsv_)
+	cond: The breakpoint junction condition. In this case, we've only kept iteration 1
 '''
 
 def merging (blastdf, cond):
-	blastdf = blastdf.loc[:,~blastdf.columns.duplicated()].copy()
+		if blastdf.empty:
+			blastdf['ID'] = pd.Series(dtype='object')
 
-	# We merge the files, Recall, not ALL SVs produce , therefore we use a "left" merge to allow for this. 
-	merged = pd.merge(svs, blastdf, how = 'left', on = 'ID', indicator = True)
+		blastdf = blastdf.loc[:,~blastdf.columns.duplicated()].copy()
+		merged = pd.merge(svs, blastdf, how = 'left', on = 'ID', indicator = True)
+		return merged
 
-	# We create a binary column to describe the absense/ presence of an alignment result. 
-	for idx, row in merged.iterrows():
-		if row['_merge'] == 'left_only':
-			merged.loc[idx, cond+'BlastHomo'] = False
-		elif row['_merge'] == 'both':
-			merged.loc[idx, cond+'BlastHomo'] = True
-
-	return merged
-
-# Calling the merging function for the 3 types of alignments. We then create a "merged" dataframe to represent the merged file where all 3 alignment types are represented
-merged_prepost = merging(prepost, 'prepost_')
-merged_presv = merging(presv, 'presv_')
-merged_postsv = merging(postsv, 'postsv_')
-
-if len(merged_prepost) > 0:
-	merge1 = pd.merge(merged_prepost,merged_presv,how = 'outer', on='ID')
-	merged = pd.merge(merge1, merged_postsv,how = 'outer', on='ID')
-else:
-	merge1 = pd.merge(merged_postsv,merged_presv,how = 'outer', on='ID')
-	merged = pd.merge(merge1, merged_prepost,how = 'outer', on='ID')
+# We then create a "merged" dataframe to represent the merged file 
+merged = merging(iter1, 'iter1_loose_')
 
 merged = merged.loc[:,~merged.columns.str.endswith('_x')]
 merged = merged.loc[:,~merged.columns.str.endswith('_y')]
 
-# A quality control check for the columns
-checkingblastcols = ['prepost_length', 'presv_qend', 'presv_qstart', 'presv_gapopen', 'postsv_qend', 'postsv_qstart', 'postsv_gapopen', 'prepost_pident', 'presv_pident', 'postsv_pident']
-for i in checkingblastcols:
-	if i not in merged.columns:
-		merged[i] = 0
+merged.columns = merged.columns.str.replace('_x$', '', regex=True)
+merged.columns = merged.columns.str.replace('_y$', '', regex=True)
 
 # Saving the annotated dataframe
-merged.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/Blast/'+chr+'/postmerge/' +filename+ '.Blastmergesungap.csv', sep='\t', index=False)
+merged.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/Blast/'+chr+'/postmerge/' +filename+ '.Blastmergesungap_iter1.csv', sep='\t', index=False)
 
 print('end of script')
 print('END TIME:', datetime.datetime.now(timezone('EST')))
