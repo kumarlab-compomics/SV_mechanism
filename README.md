@@ -9,6 +9,8 @@ This is done by:
   
 The purpose of this is to better describe potential mechanisms of SV introduction, namely double strand break (DSB) repair. As such, SVs, their breakpoints and their flanking sequences are annotated with a number of features. These features include sequence, DNA accessibility, Replication Timing, repetitive elements, nonB DNA structures, and DNA shape. To robustly describe real SVs, we then generate 100 simulated SVs which match in the real SVs' length, type and chromosome. This therefore, allows for z-score standardization across all these features. 
 
+Preprint: https://www.biorxiv.org/content/10.1101/2025.09.20.677549v1
+
 ## Step 0 : Real structural variant (SV) source
 
 Start with a vcf with SVs. For example, you can download and place the integrated callset from HGSVC2 here:
@@ -17,7 +19,7 @@ Start with a vcf with SVs. For example, you can download and place the integrate
 wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/HGSVC2/release/v2.0/integrated_callset/variants_freeze4_sv_insdel_alt.vcf.gz -P ./data/HGSVC2/
 ```
 
-Next, this vcf should then be manipulated to contain: resolved insertions and/or deletions of 50bp or greater. This file must contain a unique list of SVs with the following columns:
+Next, this vcf should then be manipulated to contain: resolved insertions, deletions and inversions of 50bp or greater. This file must contain a unique list of SVs with the following columns:
 
 -  CHROM; Chromosome
 -  POS; Breakpoint position
@@ -109,7 +111,8 @@ In ``` execute_Master1.sh ``` the following bash scripts are copied and customiz
 - ``` execute_flankSeqTemplate.sh ``` : To extract reference genome sequences from the flanking coordinates. Next, we use these sequences to calculate sequence features, local homology (as per Blast alignments) and DNA shape
   - ``` adding_flankSeq.py ```
   - ``` adding_seqFeatures.py ```
-  - ``` adding_BlastDNAShape.py ```
+  - ``` adding_DNAShape.py ```
+  - ``` adding_Blast.py ```
   - ``` adding_Blastmerges.py ```
 - ``` execute_searchRepeatMaskerTemplate.sh ``` : To run Repeat Masker on the deleted and inserted sequences
   - ``` adding_searchRepeatMasker.py ```
@@ -240,7 +243,7 @@ Upon the completion of this script, the results which describe the parameter com
 
 From the above, we identified the following as the ideal parameters: 
 
-- Insertions: PCA using 5 components, a minimum of 1300 SVs required for a cluster, Bray-Curtis distance metric
+- Insertions: PCA using 2 components, a minimum of 1300 SVs required for a cluster, Canberra distance metric
 - Deletions: PCA using 5 components, a minimum of 700 SVs required for a cluster, Bray-Curtis distance metric
 
 We therefore, wanted to train models which could be freely applied across any dataset. This required applying the above parameters to scaling, PCA, KNN models trained using the HGSVC2 training chromosomes, which are saved for future use. Therefore, to run this, use: 
@@ -249,7 +252,7 @@ We therefore, wanted to train models which could be freely applied across any da
 sbatch execute_PCAhdbscanOptimal.sh
 ```
 
-Finally, we wanted to apply these models across multiple datasets. This includes, applying it to the entire HGSVC2 dataset, along with independent datasets such as 1KG, 1KG-ONT, or SVs from 100KG. The requirements are as follows:
+Finally, we wanted to apply these models across multiple datasets. This includes, applying it to the entire HGSVC2 dataset, along with independent datasets such as 1KG, 1KG-ONT, or SVs from 100KG. Finally, we can subcluster based on the z-score alignment length to identify "HD" and "nHD" SVs within each cluster. The requirements are as follows:
 
 1. The project name
 2. sv
