@@ -27,16 +27,21 @@ feat = pd.read_csv(str(argv[6]), comment='#', sep='\t')
 # Next, we filter and standardize the ID column to allow for proper merging at the end 
 # These steps are repeated a few times throughout this script
 types = feat.SV_Type.unique()
-if ('deletion' in types) | ('insertion' in types) :
-	if typer == 'DEL':
-		type = 'deletion'
-	elif typer == 'INS':
-		type = 'insertion'
-elif ('DEL' in types) | ('INS' in types):
-	if typer == 'DEL':
-		type = 'DEL'
-	elif typer == 'INS':
-		type = 'INS'
+if ('deletion' in types) | ('insertion' in types) | ('inversion' in types) :
+		if typer == 'DEL':
+			type = 'deletion'
+		elif typer == 'INS':
+			type = 'insertion'
+		elif typer == 'INV':
+			type = 'inversion'
+
+elif ('DEL' in types) | ('INS' in types)| ('INV' in types):
+		if typer == 'DEL':
+			type = 'DEL'
+		elif typer == 'INS':
+			type = 'INS'
+		elif typer == 'INV':
+			type = 'INV'
 
 feat = feat[(feat.CHROM == chr) & (feat.SV_Type == type)]
 
@@ -45,6 +50,8 @@ for idx, row in feat.iterrows():
 		feat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		feat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		feat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 
 # Depending on if we have a simulation vcf or real vcf, we include different columns. This will be required for the z-score/ homology annotations
 if ('SIM' in loc ) | ('sim' in loc ) | ('Sim' in loc ):
@@ -68,6 +75,9 @@ for idx, row in flankfeat.iterrows():
 		flankfeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		flankfeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		flankfeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
+
 
 flankfeat = flankfeat.loc[:, flankfeat.columns.str.contains('ID|pre|post')]
 flankfeat = flankfeat.loc[:, ~flankfeat.columns.str.contains('_seq_')]
@@ -87,6 +97,9 @@ for idx, row in repSV.iterrows():
 		repSV.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repSV.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repSV.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
+
 	if 'Simple_repeat' in str(row.RepMasker_repClass):
 		repSV.loc[idx, 'Simple_repeat_logic'] = 1
 	else:
@@ -150,6 +163,9 @@ for idx, row in repLINE.iterrows():
 		repLINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repLINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repLINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
+
 repLINE = repLINE[['ID', 'LINE_sum']]
 print(repLINE.head())
 print('number of lines from repLINE', len(repLINE.ID.unique()))
@@ -161,6 +177,8 @@ for idx, row in repLOW.iterrows():
 		repLOW.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repLOW.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repLOW.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 repLOW = repLOW[['ID', 'Low_complexity_sum']]
 print(repLOW.head())
 print('number of lines from repLOW', len(repLOW.ID.unique()))
@@ -172,6 +190,8 @@ for idx, row in repLTR.iterrows():
 		repLTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repLTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repLTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 repLTR = repLTR[['ID', 'LTR_sum']]
 print(repLTR.head())
 print('number of lines from repLTR', len(repLTR.ID.unique()))
@@ -183,6 +203,8 @@ for idx, row in repSAT.iterrows():
 		repSAT.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repSAT.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repSAT.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 repSAT = repSAT[['ID', 'Satellite_sum']]
 print(repSAT.head())
 print('number of lines from rep', len(repSAT.ID.unique()))
@@ -205,6 +227,8 @@ for idx, row in repSINE.iterrows():
 		repSINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		repSINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		repSINE.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 repSINE = repSINE[['ID', 'SINE_sum']]
 print(repSINE.head())
 print('number of lines from rep', len(repSINE.ID.unique()))
@@ -230,6 +254,8 @@ for idx, row in nonbDR.iterrows():
 		nonbDR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		nonbDR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		nonbDR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 nonbDR = nonbDR[['ID', 'DR_sum']]
 print(nonbDR.head())
 print('number of lines from nonb', len(nonbDR.ID.unique()))
@@ -241,6 +267,8 @@ for idx, row in nonbGQ.iterrows():
 		nonbGQ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		nonbGQ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		nonbGQ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 nonbGQ = nonbGQ[['ID', 'G4_sum']]
 print(nonbGQ.head())
 print('number of lines from nonb', len(nonbGQ.ID.unique()))
@@ -252,6 +280,8 @@ for idx, row in nonbMR.iterrows():
 		nonbMR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		nonbMR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		nonbMR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 nonbMR = nonbMR[['ID', 'MR_sum']]
 print(nonbMR.head())
 print('number of lines from nonb', len(nonbMR.ID.unique()))
@@ -263,6 +293,8 @@ for idx, row in nonbSTR.iterrows():
 		nonbSTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		nonbSTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		nonbSTR.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 nonbSTR = nonbSTR[['ID', 'STR_sum']]
 print(nonbSTR.head())
 print('number of lines from nonb', len(nonbSTR.ID.unique()))
@@ -274,30 +306,46 @@ for idx, row in nonbZ.iterrows():
 		nonbZ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
 	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
 		nonbZ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+	elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		nonbZ.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 nonbZ = nonbZ[['ID', 'ZDNA_sum']]
 print(nonbZ.head())
 print('number of lines from nonb', len(nonbZ.ID.unique()))
 
-# Annotation : Local homology between the SV-preflank, SV-postflank, preflank-postflank (adding_Blastmerges.py)
+# Annotation: Chromoband, will generate a dummy variable for which chromoband is present at the breakpoint
+chromoband = pd.read_csv(str(argv[21]), comment='#', sep='\t')
+chromoband = chromoband[(chromoband.CHROM == chr) & (chromoband.SV_Type == type)]
+for idx, row in chromoband.iterrows():
+		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
+			chromoband.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
+			chromoband.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+		chromoband.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
+chromoband = chromoband[['ID', 'gieStain']]
+chromoband_dum = pd.get_dummies(chromoband, columns = ['gieStain'])
+chromoband_dum = chromoband_dum.reset_index(drop=True)
+print(chromoband_dum.head())
+print('number of lines from chromoband_dum', len(chromoband_dum.ID.unique()))
+
+
+# Annotation : Local homology between the SV-preflank vs SV-postflank (adding_Blastmerges.py)
 # In this case, we are calculating "coverage" values based on the expected lengths
-	# For SV-preflank, SV-postflank : The denominator is the length of the SV
 	# For preflank-postflank : The denominator is 2000bp (ie. the length of one side of the flank)
-blast = pd.read_csv(str(argv[21]), comment='#', sep='\t')
+blast = pd.read_csv(str(argv[22]), comment='#', sep='\t')
 blast = blast[(blast.CHROM == chr) & (blast.SV_Type == type)]
 blast[['chr', 'pos', 'len', 'type']] = blast['ID'].str.split('_',  expand=True)
 blast[["pos", "len"]] = blast[["pos", "len"]].apply(pd.to_numeric)
 
 for idx, row in blast.iterrows():
-	blast.loc[idx, 'prepost_Blastcoverage'] = (row.prepost_length)/2000
-	blast.loc[idx, 'presv_Blastcoverage'] = (row.presv_qend - row.presv_qstart-row.presv_gapopen)/row.SVlen
-	blast.loc[idx, 'postsv_Blastcoverage'] = (row.postsv_qend - row.postsv_qstart-row.postsv_gapopen)/row.SVlen
-
-	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
-		blast.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
-	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
-		blast.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
-
-blast = blast[['ID', 'prepost_pident', 'prepost_Blastcoverage', 'presv_pident', 'presv_Blastcoverage', 'postsv_pident', 'postsv_Blastcoverage']]
+		blast.loc[idx, 'iter1_Blastcoverage'] = (row.iter1_length)/2000
+		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
+			blast.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
+			blast.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+			blast.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
+blast = blast[['ID', 'iter1_pident', 'iter1_Blastcoverage', 'iter1_prebrkpt_loose','iter1_postbrkpt_loose', 'iter1_qstart', 'iter1_qend', 'iter1_sstart', 'iter1_send', 'iter1_length']]
 blast = blast.fillna(0)
 blast = blast.reset_index(drop=True)
 
@@ -305,13 +353,16 @@ print(blast.head())
 print('number of lines from blasting', len(blast.ID.unique()))
 
 # Annotation : Epigenetics from the flank (adding_epiFeaturesflanks.py)
-epifeat = pd.read_csv(str(argv[22]), comment='#', sep='\t')
+# Epigenetics results - depends on type of variant we're doing
+epifeat = pd.read_csv(str(argv[23]), comment='#', sep='\t')
 epifeat = epifeat[(epifeat.CHROM == chr) & (epifeat.SV_Type == type)]
 for idx, row in epifeat.iterrows():
-	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
-		epifeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
-	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
-		epifeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
+			epifeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
+			epifeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+			epifeat.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 
 epifeat = epifeat.loc[:, epifeat.columns.str.contains('ID|avg|slope|std')]
 epifeat = epifeat.fillna(0)
@@ -320,17 +371,20 @@ epifeat = epifeat.reset_index(drop=True)
 print(epifeat.head())
 print('number of lines from epifeat', len(epifeat.ID.unique()))
 
-# Annotation : DNA shape features of the SV, preflank and postflank (adding_BlastDNAShape.py)
-shape = pd.read_csv(str(argv[23]), sep='\t')
+# Annotation : DNA shape features of the SV, preflank and postflank (adding_DNAShape.py)
+# Adding DNA shape features
+shape = pd.read_csv(str(argv[24]), sep='\t')
 shape[['chr', 'pos', 'len', 'type']] = shape['ID'].str.split('_',  expand=True)
 shape[["pos", "len"]] = shape[["pos", "len"]].apply(pd.to_numeric)
 shape = shape[(shape.chr == chr) & (shape.type == type)]
 
 for idx, row in shape.iterrows():
-	if (row.type == 'deletion') | (row.type == 'DEL') :
-		shape.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'DEL' +'-'+ str(int(float(row.len)))
-	elif (row.type == 'insertion') | (row.type == 'INS') :
-		shape.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INS' +'-'+ str(int(float(row.len)))
+		if (row.type == 'deletion') | (row.type == 'DEL') :
+			shape.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'DEL' +'-'+ str(int(float(row.len)))
+		elif (row.type == 'insertion') | (row.type == 'INS') :
+			shape.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INS' +'-'+ str(int(float(row.len)))
+		elif (row.type == 'inversion') | (row.type == 'INV') :
+			shape.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INV' +'-'+ str(int(float(row.len)))
 
 shape = shape.loc[:, shape.columns.str.contains('ID|SV|PRE|POST')]
 shape = shape.replace(np. nan,0)
@@ -339,29 +393,33 @@ print(shape.head())
 print('number of lines from shape', len(shape.ID.unique()))
 
 # Annotation : Replication timing of the SV position/ breakpoint (adding_RepliSeq.py)
-repli = pd.read_csv(str(argv[24]), sep='\t')
+repli = pd.read_csv(str(argv[25]), sep='\t')
 repli = repli[(repli.CHROM == chr) & (repli.SV_Type == type)]
 for idx, row in repli.iterrows():
-	if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
-		repli.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
-	elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
-		repli.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
+			repli.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
+			repli.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+		elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+			repli.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 repli = repli[['ID', 'S50']]
 print(repli.head())
 print('number of lines from repli', len(repli.ID.unique()))
 
 # Annotation : Max Rloop level within the flanks (adding_flankRLoop.py)
-rloop = pd.read_csv(str(argv[25]), sep='\t')
+rloop = pd.read_csv(str(argv[26]), sep='\t')
 rloop = rloop.rename(columns={'unique_id': 'ID'})
 rloop[['chr', 'pos', 'len', 'type']] = rloop['ID'].str.split('_',  expand=True)
 rloop[["pos", "len"]] = rloop[["pos", "len"]].apply(pd.to_numeric)
 rloop = rloop[(rloop.chr == chr) & (rloop.type == type)]
 
 for idx, row in rloop.iterrows():
-	if (row.type == 'deletion') | (row.type == 'DEL') :
-		rloop.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'DEL' +'-'+ str(int(float(row.len)))
-	elif (row.type == 'insertion') | (row.type == 'INS') :
-		rloop.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INS' +'-'+ str(int(float(row.len)))
+		if (row.type == 'deletion') | (row.type == 'DEL') :
+			rloop.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'DEL' +'-'+ str(int(float(row.len)))
+		elif (row.type == 'insertion') | (row.type == 'INS') :
+			rloop.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INS' +'-'+ str(int(float(row.len)))
+		elif (row.type == 'inversion') | (row.type == 'INV') :
+			rloop.loc[idx, 'ID'] = row.chr +'-'+ str(row.pos+1) +'-'+ 'INV' +'-'+ str(int(float(row.len)))
 
 rloop = rloop[['ID', 'RLoop']]
 rloop = rloop.replace(np. nan,0)
@@ -373,54 +431,55 @@ print('number of lines from Rloop', len(rloop.ID.unique()))
 # In either case, you append all the dataframes together, and clean up the column names
 
 if (type == 'insertion') | (type=='INS'):
-	dataframes = [feat_filt, flankfeat, repSV, repLINE, repLOW, repLTR, repSAT, repSIM, repSINE, nonbAPR, nonbDR, nonbGQ, nonbMR, nonbSTR, nonbZ, chromoband_dum, blast, epifeat, shape, repli, rloop]
-	results = dataframes[0]
-	for df in dataframes[1:]:
-		results = results.drop_duplicates(subset=['ID'])
-		df = df.drop_duplicates(subset=['ID'])
+		dataframes = [feat_filt, flankfeat, repSV, repLINE, repLOW, repLTR, repSAT, repSIM, repSINE, nonbAPR, nonbDR, nonbGQ, nonbMR, nonbSTR, nonbZ, chromoband_dum, blast, epifeat, shape, repli, rloop]
+		results = dataframes[0]
+		for df in dataframes[1:]:
+			results = results.drop_duplicates(subset=['ID'])
+			df = df.drop_duplicates(subset=['ID'])
 
-		results = results.merge(df, on='ID', how='inner', suffixes=('', '_delme'))
-		results = results[[c for c in results.columns if not c.endswith('_delme')]]
+				results = results.merge(df, on='ID', how='inner', suffixes=('', '_delme'))
+				results = results[[c for c in results.columns if not c.endswith('_delme')]]
 
-	results = results.replace(np.nan, 0)
-	print(results.head())
-	newrows = len(results)
-	print('number of rows we got', newrows)
-
+		results = results.replace(np.nan, 0)
+		print(results.head())
+		newrows = len(results)
+		print('number of rows we got', newrows)
 
 # Annotation : Epigenetics from the SV (adding_epiFeaturesSV.py)
-elif (type == 'deletion') | (type=='DEL'):
-	epi = pd.read_csv(str(argv[26]), comment='#', sep='\t')
-	epi = epi[(epi.CHROM == chr) & (epi.SV_Type == type)]
-	for idx, row in epi.iterrows():
-		if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
-			epi.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
-		elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
-			epi.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+elif (type == 'deletion') | (type=='DEL') | (type=='inversion') | (type=='INV'):
+		epi = pd.read_csv(str(argv[27]), comment='#', sep='\t')
+		epi = epi[(epi.CHROM == chr) & (epi.SV_Type == type)]
+		for idx, row in epi.iterrows():
+			if (row.SV_Type == 'deletion') | (row.SV_Type == 'DEL') :
+				epi.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'DEL' +'-'+ str(int(float(row.SVlen)))
+			elif (row.SV_Type == 'insertion') | (row.SV_Type == 'INS') :
+					epi.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INS' +'-'+ str(int(float(row.SVlen)))
+			elif (row.SV_Type == 'inversion') | (row.SV_Type == 'INV') :
+				epi.loc[idx, 'ID'] = row.CHROM +'-'+ str(row.POS+1) +'-'+ 'INV' +'-'+ str(int(float(row.SVlen)))
 
-	epi = epi.loc[:, epi.columns.str.contains('ID|avg|slope|std')]
-	epi = epi.replace(np. nan,0)
-	epi = epi.reset_index(drop=True)
+		epi = epi.loc[:, epi.columns.str.contains('ID|avg|slope|std')]
+		epi = epi.replace(np. nan,0)
+		epi = epi.reset_index(drop=True)
+	
+        print(epi.head())
+        print('number of lines from epi', len(epi.ID.unique()))
 
-	print(epi.head())
-	print('number of lines from epi', len(epi.ID.unique()))
+		# Finally we can concatenate and merge all the df developed from the above. 
+		dataframes = [feat_filt, flankfeat, repSV, repLINE, repLOW, repLTR, repSAT, repSIM, repSINE, nonbAPR, nonbDR, nonbGQ, nonbMR, nonbSTR, nonbZ, blast, epifeat, shape, repli, rloop, epi]
+		results = dataframes[0]
+		for df in dataframes[1:]:
+			results = results.drop_duplicates(subset=['ID'])
+			df = df.drop_duplicates(subset=['ID'])
 
-	dataframes = [feat_filt, flankfeat, repSV, repLINE, repLOW, repLTR, repSAT, repSIM, repSINE, nonbAPR, nonbDR, nonbGQ, nonbMR, nonbSTR, nonbZ, chromoband_dum, blast, epifeat, shape, repli, rloop, epi]
-	results = dataframes[0]
-	for df in dataframes[1:]:
-		results = results.drop_duplicates(subset=['ID'])
-		df = df.drop_duplicates(subset=['ID'])
+			results = results.merge(df, on='ID', how='inner', suffixes=('', '_delme'))
+			results = results[[c for c in results.columns if not c.endswith('_delme')]]
 
-		results = results.merge(df, on='ID', how='inner', suffixes=('', '_delme'))
-		results = results[[c for c in results.columns if not c.endswith('_delme')]]
+		results = results.replace(np.nan, 0)
+		print(results.head())
+		newrows = len(results)
+		print('number of rows we got', newrows)
 
-	results = results.replace(np.nan, 0)
-	print(results.head())
-	newrows = len(results)
-	print('number of rows we got', newrows)
-
-# Save the final merged file for this SV type, chromosome and this split
-results.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/merge_FeatMatrix/'+chr+'/' +filename+'.'+typer+ '.FeatMatrix.csv', sep='\t', index=False)
+results.to_csv('/home/nboev/projects/def-sushant/nboev/preprocess/'+project+'/'+loc+'/merge_FeatMatrix/'+chr+'/' +filename+'.'+typer+ '.FeatMatrix_iter1.csv', sep='\t', index=False)
 
 print('END TIME:', datetime.datetime.now(timezone('EST')))
 
