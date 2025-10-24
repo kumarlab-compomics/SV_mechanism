@@ -31,7 +31,8 @@ mkdir /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix/$
 
 # The following:
 # Loops through all the splits for a particular chromosome
-# For insertions and deletions, we handle merging separately, since epigenetic features differ (ie. we cannot annotate the epigenetic state as per the inserted sequence)
+# For insertions and deletions, inversions, we handle merging separately, since epigenetic features differ (ie. we cannot annotate the epigenetic state as per the inserted sequence)
+	# Note: We check if the repeat masker file is present
 # We push the merging python script, merge_FeatMatrix.py, which systematically merges the SVs as per their unique ID
 # The processing we do for each file differs sligtly, therefore we "manually" control each file input
 
@@ -39,8 +40,11 @@ cat /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/SVlen/${files}/split
 	do
 	loc=$(basename "$line")
 	locnoext=$(basename "${loc%.*}")
-
-	python merge_FeatMatrix.py \
+	repeat="/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/searchRepeatMasker/${files}/${locnoext}/${locnoext}.searchRepMasker.csv"
+	if [ -f "${repeat}" ]; then
+		echo "repeat masker file present"
+		
+		python merge_FeatMatrix.py \
 $1 $2 ${locnoext} \
 ${files} DEL \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/seqFeaturesSV/${files}/${locnoext}.withSVSeqFeat.csv \
@@ -58,15 +62,16 @@ ${files} DEL \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/mirror_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/short_tandem_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/z-dna_motifs.${locnoext}.flanks.csv \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/chromoBand/${files}/${locnoext}.SVlength.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap_iter1.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.2000.EpiFeat.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/DNAshape/${files}/postmerge/${locnoext}.DNAshape.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepliSeq/${files}/${locnoext}.withRepliSeq.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RLoopForming/${files}/postmerge/${locnoext}.RLoopflanks_merged.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.EpiFeatSVs.csv \
->> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix_240530.py.txt
+>> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix_260610.py.txt
 
-        python merge_FeatMatrix.py \
+        	python merge_FeatMatrix.py \
 $1 $2 ${locnoext} \
 ${files} INS \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/seqFeaturesSV/${files}/${locnoext}.withSVSeqFeat.csv \
@@ -84,20 +89,50 @@ ${files} INS \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/mirror_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/short_tandem_repeats.${locnoext}.flanks.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/z-dna_motifs.${locnoext}.flanks.csv \
-/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/chromoBand/${files}/${locnoext}.SVlength.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap_iter1.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.2000.EpiFeat.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/DNAshape/${files}/postmerge/${locnoext}.DNAshape.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepliSeq/${files}/${locnoext}.withRepliSeq.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RLoopForming/${files}/postmerge/${locnoext}.RLoopflanks_merged.csv \
 /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.EpiFeatSVs.csv \
->> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix_240530.py.txt
-	done
+>> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix_260610.py.txt
+
+		python merge_FeatMatrix_260610.py \
+$1 $2 ${locnoext} \
+${files} INV \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/seqFeaturesSV/${files}/${locnoext}.withSVSeqFeat.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/seqFeatures/${files}/${locnoext}.with2000SeqFeat.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/searchRepeatMasker/${files}/${locnoext}/${locnoext}.searchRepMasker.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/LINE.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/Low_complexity.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/LTR.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/Satellite.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/Simple_repeat.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepeatMasker/${files}/postmerge/SINE.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/a-phased_repeats.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/direct_repeats.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/g-quadruplex_forming_repeats.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/mirror_repeats.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/short_tandem_repeats.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/nonBDNA/${files}/postmerge/z-dna_motifs.${locnoext}.flanks.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/chromoBand/${files}/${locnoext}.SVlength.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/Blast/${files}/postmerge/${locnoext}.Blastmergesungap_iter1.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.2000.EpiFeat.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/DNAshape/${files}/postmerge/${locnoext}.DNAshape.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RepliSeq/${files}/${locnoext}.withRepliSeq.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/RLoopForming/${files}/postmerge/${locnoext}.RLoopflanks_merged.csv \
+/home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/ENCODE/$3/${files}/${locnoext}.EpiFeatSVs.csv \
+>> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix_260610.py.txt
+			fi
+			
+		done
 
 # We merge these files all together 
-for ext in DEL INS ;
+for ext in DEL INS INV ;
 	do
-	cat /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix/${files}/*.${ext}.FeatMatrix.csv \
-> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix/${files}.full.csv.${ext}.FeatMatrix.csv
+	cat /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix/${files}/*.${ext}.FeatMatrix_iter1.csv \
+> /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/merge_FeatMatrix/${files}.full.csv.${ext}.FeatMatrix_iter1.csv
 	done
 
 
